@@ -1,59 +1,99 @@
-import bcrypt, { hash } from "bcrypt"
-import jwt from "jsonwebtoken"
-import User from "../../models/UserSchema.js"
-import nodemailer from 'nodemailer'
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../../models/UserSchema.js";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-const NodeEmail = process.env.EMAIL
-const EmailPass = process.env.EMAIL_PASS
+const NodeEmail = process.env.EMAIL;
+const EmailPass = process.env.EMAIL_PASS;
+const jwtSecret = process.env.JWT_SECRET;
 
+const otpStorage = new Map();
 
-
-const RegisterUserController = async (req, res) => {
+export async function registerUser(req, res) {
   try {
-    const { Name, Email, PhoneNumber, Password } = req.body;
+    const { name, email, phoneNumber, password } = req.body;
 
-    const existingUser = await User.findOne({ Email });
+    if (!name || !email || !phoneNumber || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Enter a different Email" });
+      return res.status(400).json({ message: "Email already exists" });
     }
 
     const otp = Math.floor(1000 + Math.random() * 9000);
+
+    otpStorage.set(email, {
+      name,
+      email,
+      phoneNumber,
+      password,
+      otp
+    });
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: NodeEmail,
-        pass: EmailPass,
-      },
+        pass: EmailPass
+      }
     });
 
-    // Send mail
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: NodeEmail,
-      to: Email,
+      to: email,
       subject: "OTP Verification",
-      html: `<h1>Your OTP is: ${otp}</h1>`,
+      html: `<h2>Your OTP is: ${otp}</h2>`
     });
 
-    console.log("Message sent:", Email);
+    return res.status(200).json({ message: "OTP sent to email" });
 
-    return res.status(200).json({
-      message: "OTP sent to email",
-      otp: otp  
-    });
-
-
-
-    
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "register user failed" });
+    return res.status(500).json({ message: "Registration failed", error: err.message });
   }
-};
+}
 
+export async function verifyOtp(req, res) {
+  try {
+    const { email, otp } = req.body;
 
+    const data = otpStorage.get(email);
+    if (!data) {
+      return res.status(400).json({ message: "OTP expired or not found" });
+    }
 
-export default RegisterUserController
+    if (Number(otp) !== Number(data.otp)) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const user = await User.create({
+      name: data.name,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      password: hashedPassword
+    });
+
+    otpStorage.delete(email);
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      jwtSecret,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false 
+    });
+
+    return res.status(201).json({ message: "User registered successfully", user });
+
+  } catch (err) {
+    return res.status(500).json({ message: "OTP verification failed", error: err.message });
+  }
+}
