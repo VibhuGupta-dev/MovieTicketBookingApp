@@ -2,7 +2,7 @@ import express from "express"
 import userrouter from "./routes/UserRoutes.js"
 import cors from "cors"
 import connectmongodb from "./utils/MongooseConnect.js"
-
+import cinimaroute from "./routes/ChinemaHallRoutes.js"
 const PORT = 3000
 const app = express()
 
@@ -23,7 +23,7 @@ app.get("/" , (req , res) => {
 })
 
 app.use('/user' , userrouter)
-
+app.use('/cinemahall' , cinimaroute)
 
 app.listen( PORT , (req , res) => {
     try {

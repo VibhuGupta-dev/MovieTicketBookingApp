@@ -13,7 +13,7 @@ const otpStorage = new Map();
 
 export async function registerUser(req, res) {
   try {
-    const { name, email, phoneNumber, password } = req.body;
+    const { name, email, phoneNumber, password , role} = req.body;
 
     if (!name || !email || !phoneNumber || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -27,6 +27,7 @@ export async function registerUser(req, res) {
     const otp = Math.floor(1000 + Math.random() * 9000);
 
     otpStorage.set(email, {
+      role,
       name,
       email,
       phoneNumber,
@@ -75,7 +76,8 @@ export async function verifyOtp(req, res) {
       name: data.name,
       email: data.email,
       phoneNumber: data.phoneNumber,
-      password: hashedPassword
+      password: hashedPassword,
+      role : data.role
     });
 
     otpStorage.delete(email);
