@@ -3,10 +3,11 @@ import userrouter from "./routes/UserRoutes.js"
 import cors from "cors"
 import connectmongodb from "./utils/MongooseConnect.js"
 import cinimaroute from "./routes/ChinemaHallRoutes.js"
+import cookieParser from "cookie-parser"
 const PORT = 3000
 const app = express()
 
-
+app.use(cookieParser())
 app.use(express.json())
 app.use(cors ({
     origin : "*" 

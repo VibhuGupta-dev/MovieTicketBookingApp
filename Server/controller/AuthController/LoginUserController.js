@@ -7,10 +7,8 @@ const jwtSecret = process.env.JWT_SECRET;
 export async function loginUser(req, res) {
   try {
     const { email, password } = req.body;
-    console.log(password);
 
     const user = await User.findOne({ email });
-    console.log(user);
     if (!user) {
       return res.status(404).json({ message: "user not found" });
     }
@@ -37,7 +35,7 @@ export async function loginUser(req, res) {
     return res
       .status(200)
       .json({
-        message: `login sucessfull email : ${email}  pass :  ${password}`,
+        message: `login sucessfull email : ${email}  `,
       });
   } catch (err) {
     return res.status(500).json({ message: "error in loginuser", Error });
