@@ -14,10 +14,14 @@ export async function isownerloggedin(req, res, next) {
 
    
     const decoded = jwt.verify(token, jwtSecret);
-    console.log("DECODED:", decoded);
-
+    if(!decoded) {
+      return res.status(400).json({message : "it is not decoded"})
+    }
   
     const userEmail = decoded.email;
+    if(!userEmail) {
+      return res.status(400).json({message : "username not found"})
+    }
 
     const user = await User.findOne({ email: userEmail });
 

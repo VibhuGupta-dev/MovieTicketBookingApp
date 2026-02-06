@@ -1,7 +1,6 @@
 import Cinema from "../../models/CinemaHallSchema.js"
 
 export async function deletecinemahall(req , res) {
-
     try {
         const cinemahall = req.params.chinemahallID
         if(!cinemahall) {
@@ -11,9 +10,9 @@ export async function deletecinemahall(req , res) {
         console.log(cinemahall , userID)
 
         const findcinemahall = await Cinema.findOneAndDelete({_id : cinemahall })
-        
-         if(!cinemahall){
-            return res.status(400).json({message : "cinemahallID is not there in params"})
+
+         if(!findcinemahall){
+            return res.status(400).json({message : "cinemahall is not deleted"})
          }
 
          return res.status(200).json({message : "cinemahall deleted "})
@@ -22,4 +21,3 @@ export async function deletecinemahall(req , res) {
         return res.status(500).json({message : "error in deletecinma hall"})
     }
 }
-
