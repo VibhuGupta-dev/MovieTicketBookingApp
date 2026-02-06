@@ -10,5 +10,5 @@ const router = express.Router()
 router.post('/api/addchinemahall' , isownerloggedin , addChinemaHall)
 router.delete('/api/deletecinemahall/:chinemahallID' , isownerloggedin , deletecinemahall)
 router.get('/api/getcinemahall/:chinemahallID' , isownerloggedin , getcinemahall)
-router.post('/api/updatemoviehall/:chinemahallID' , isownerloggedin , updateStore )
+router.put('/api/updatecinemahall/:chinemahallID', isownerloggedin , updateStore )
 export default router
