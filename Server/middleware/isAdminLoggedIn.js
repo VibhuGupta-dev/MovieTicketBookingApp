@@ -3,7 +3,7 @@ import User from "../models/UserSchema.js";
 
 const jwtSecret = process.env.JWT_SECRET;
 
-export async function isAdminrloggedin(req, res, next) {
+export async function isAdminloggedin(req, res, next) {
   try {
     
     const token = req.cookies.token;
@@ -30,8 +30,8 @@ export async function isAdminrloggedin(req, res, next) {
     }
 
 
-    if (user.role !== "user") {
-      return res.status(403).json({ message: "Access denied: user Only" });
+    if (user.role !== "Admin") {
+      return res.status(403).json({ message: "Access denied: Admin only" });
     }
 
     
@@ -40,7 +40,7 @@ export async function isAdminrloggedin(req, res, next) {
     next();
 
   } catch (err) {
-    console.error("USER MIDDLEWARE ERROR:", err);
+    console.error("Admin MIDDLEWARE ERROR:", err);
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 }

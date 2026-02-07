@@ -4,6 +4,8 @@ import cors from "cors"
 import connectmongodb from "./utils/MongooseConnect.js"
 import cinimaroute from "./routes/ChinemaHallRoutes.js"
 import cookieParser from "cookie-parser"
+import movierouter from "./routes/MovieRoutes.js"
+
 const PORT = 3000
 const app = express()
 
@@ -25,6 +27,7 @@ app.get("/" , (req , res) => {
 
 app.use('/user' , userrouter)
 app.use('/cinemahall' , cinimaroute)
+app.use('/movie' , movierouter)
 
 app.listen( PORT , (req , res) => {
     try {

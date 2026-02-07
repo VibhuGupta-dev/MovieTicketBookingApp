@@ -15,7 +15,7 @@ export async function updateStore(req, res) {
       return res.status(400).json({ message: "userID not found" });
     }
 
-    const cinemaHallID = req.params.chinemahallID; // make sure route param name same ho
+    const cinemaHallID = req.params.chinemahallID;
     if (!cinemaHallID) {
       return res.status(400).json({ message: "cinemaHallID not found" });
     }
@@ -29,7 +29,7 @@ export async function updateStore(req, res) {
         address,
         logo
       },
-      { new: true } // updated data return karega
+      { new: true } 
     );
 
     if (!updatedCinema) {
