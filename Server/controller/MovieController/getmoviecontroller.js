@@ -1,4 +1,4 @@
-import Movie from "../../models/MovieSchema";
+import Movie from "../../models/MovieSchema.js";
 
 export async function getmovie(req , res) {
     try {
@@ -8,16 +8,14 @@ export async function getmovie(req , res) {
      }
      const userID = req.userID
      if(!userID) {
-                return res.status(400).json({message : "no userid"})
+       return res.status(400).json({message : "no userid"})
      }
      const movie = await Movie.findById(movieId)
      if(!movie){
         return res.status(400).json({message : "no movie found"})
      }
-
      return res.status(201).send(movie)
      
-
     }catch(err){
         return res.status(500).json({message : "error in get movie"})
 

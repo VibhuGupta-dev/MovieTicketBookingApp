@@ -1,4 +1,4 @@
-import Movie from "../../models/MovieSchema"
+import Movie from "../../models/MovieSchema.js"
 
 export async function deletemovie(req , res) {
     try {

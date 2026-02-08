@@ -4,10 +4,23 @@ const CinemaHallSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",  
+      ref: "User",
       required: true,
     },
-
+    row: {
+      type: Number,
+      required: true,
+    },
+    seatsPerRow : {
+      type : Number,
+      required : true
+    },
+    seats: [
+      {
+        seatno: { type: String },
+        isBooked: { type: Boolean, default: false },
+      },
+    ],
     cinemaHallName: {
       type: String,
       required: true,
@@ -48,7 +61,7 @@ const CinemaHallSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Cinema = mongoose.model("Cinema", CinemaHallSchema);

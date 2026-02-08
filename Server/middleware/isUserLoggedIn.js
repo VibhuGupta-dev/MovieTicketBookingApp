@@ -3,7 +3,7 @@ import User from "../models/UserSchema.js";
 
 const jwtSecret = process.env.JWT_SECRET;
 
-export async function isAdminrloggedin(req, res, next) {
+export async function isuserloggedin(req, res, next) {
   try {
     
     const token = req.cookies.token;
