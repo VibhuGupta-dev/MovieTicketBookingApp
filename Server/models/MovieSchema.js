@@ -6,7 +6,7 @@ const movieSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-
+ 
   MovieName: {
     type: String,
     required: true,
