@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser"
 import movierouter from "./routes/MovieRoutes.js"
 import movierateing from "./routes/MovieRatingRoutes.js"
 import ticketrouter from "./routes/TicketRoute.js"
-import { Server } from "socket.io";
+import showroute from "./routes/ShowRoute.js"
 import { createServer } from "node:http";
 
 const PORT = 3000
@@ -38,6 +38,8 @@ app.use('/cinemahall' , cinimaroute)
 app.use('/movie' , movierouter)
 app.use('/rate' , movierateing)
 app.use('/ticket' , ticketrouter)
+app.use('/show' , showroute)
+
 
 server.listen( PORT , (req , res) => {
     try {

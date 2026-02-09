@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const showSchema = new mongoose.Schema({
+
+  UserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   movieId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Movie",
