@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import MovieRating from "../../models/MovieRatingSchema.js";
-// Rate or update rating for a movie
+
+
 export async function rateMovie(req, res) {
   try {
     const { rating, review } = req.body;
@@ -19,7 +20,6 @@ export async function rateMovie(req, res) {
       return res.status(400).json({ message: "review must be at least 5 characters" });
     }
 
-    // upsert = update if exists else create
     const movieRating = await MovieRating.findOneAndUpdate(
       { movieId, userId },
       { rating, review },
@@ -34,7 +34,6 @@ export async function rateMovie(req, res) {
   } catch (error) {
     console.error(error);
 
-    // duplicate key error (unique index)
     if (error.code === 11000) {
       return res.status(400).json({ message: "You already rated this movie" });
     }
@@ -43,7 +42,6 @@ export async function rateMovie(req, res) {
   }
 }
 
-// Get average rating of a movie
 export async function getMovieRating(req, res) {
   try {
     const movieId = req.params.movieId;
@@ -71,13 +69,12 @@ export async function getMovieRating(req, res) {
   }
 }
 
-// Get all reviews for a movie
 export async function getMovieReviews(req, res) {
   try {
     const movieId = req.params.movieId;
 
     const reviews = await MovieRating.find({ movieId })
-      .populate("userId", "name email") // populate user details
+      .populate("userId", "name email") 
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -91,7 +88,6 @@ export async function getMovieReviews(req, res) {
   }
 }
 
-// Delete user's rating
 export async function deleteRating(req, res) {
   try {
     const movieId = req.movieId;
@@ -109,4 +105,4 @@ export async function deleteRating(req, res) {
     console.log(error);
     res.status(500).json({ message: "server error" });
   }
-}
+} 

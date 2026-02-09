@@ -1,68 +1,29 @@
 import mongoose from "mongoose";
 
-const CinemaHallSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    row: {
-      type: Number,
-      required: true,
-    },
-    seatsPerRow : {
-      type : Number,
-      required : true
-    },
-    seats: [
-      {
-        seatno: { type: String },
-        isBooked: { type: Boolean, default: false },
-      },
-    ],
-    cinemaHallName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    locationLink: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    address: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    ongoingMovies: [
-      {
-        movieID: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Movie",
-        },
-        movieName: String,
-        movieTimeSlot: [String],
-        movieDescription: String,
-      },
-    ],
-
-    logo: {
-      type: String,
-    },
+const CinemaHallSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
-  { timestamps: true },
-);
+
+  row: Number,
+  seatsPerRow: Number,
+
+  seats: [
+    {
+      seatno: { type: String }, 
+      rate: { type: Number },
+    },
+  ],
+
+  cinemaHallName: String,
+  description: String,
+  locationLink: String,
+  address: String,
+
+  logo: String,
+}, { timestamps: true });
 
 const Cinema = mongoose.model("Cinema", CinemaHallSchema);
 export default Cinema;

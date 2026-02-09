@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema(
     },
     totalAmount: Number,
     status: String,
+    
      orderedAt: {
       type: Date,
       default: Date.now

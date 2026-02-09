@@ -19,9 +19,9 @@ function generateRowLabels(count) {
 
 export async function addChinemaHall(req, res) {
   try {
-    const { cinemaHallName, description, locationLink, address, logo, row, seatsPerRow } = req.body;
+    const { cinemaHallName, description, locationLink, address, logo, row, seatsPerRow , RatePerSeat } = req.body;
 
-    if (!cinemaHallName || !description || !locationLink || !address || !logo || !row || !seatsPerRow) {
+    if (!cinemaHallName || !description || !locationLink || !address || !logo || !row || !seatsPerRow || !RatePerSeat) {
       return res.status(400).json({ message: "all fields not filled" });
     }
 
@@ -39,7 +39,8 @@ export async function addChinemaHall(req, res) {
       for (let j = 1; j <= seatsPerRowNum; j++) {
         seats.push({
           seatno: rowLabels[i] + j,
-          isBooked: false
+          isBooked: false,
+          rate: RatePerSeat
         });
       }
     }
