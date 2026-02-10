@@ -41,7 +41,9 @@ const movieticketSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
-
+  Amount : {
+  type : Number
+  },
   bookedAt: {
     type: Date,
     default: Date.now,

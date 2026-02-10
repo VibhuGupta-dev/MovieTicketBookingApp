@@ -8,29 +8,36 @@ import movierouter from "./routes/MovieRoutes.js"
 import movierateing from "./routes/MovieRatingRoutes.js"
 import ticketrouter from "./routes/TicketRoute.js"
 import showroute from "./routes/ShowRoute.js"
-import { createServer } from "node:http";
-
+import { createServer } from "node:http"
+import { Server } from "socket.io"
+import { socketHandler } from "./controller/TicketBookingController/Lockticket.js"
+import paymentrouter from "./routes/PaymentRoutes.js"
 const PORT = 3000
 const app = express()
 export const server = createServer(app)
 
+export const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+})
 
+io.on("connection", (socket) => {
+  console.log("socket connected:", socket.id)
+})
 
 app.use(cookieParser())
 app.use(express.json())
 
-app.use(cors ({
-    origin : "*" 
+app.use(cors({
+  origin: "*"
 }))
-
+socketHandler(io)
 connectmongodb()
 
 app.get("/" , (req , res) => {
-    try {
-      res.send("hey there")
-    }catch(err) {
-     console.log(err)
-    }
+  res.send("hey there")
 })
 
 app.use('/user' , userrouter)
@@ -39,12 +46,7 @@ app.use('/movie' , movierouter)
 app.use('/rate' , movierateing)
 app.use('/ticket' , ticketrouter)
 app.use('/show' , showroute)
-
-
-server.listen( PORT , (req , res) => {
-    try {
-      console.log(`server running on ${PORT}`)
-    }catch(err) {
-        console.log(err)
-    }
+app.use('/payment' , paymentrouter)
+server.listen(PORT, () => {
+  console.log(`server running on ${PORT}`)
 })

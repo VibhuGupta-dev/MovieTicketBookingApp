@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket Test</title>
+</head>
+<body>
+  <h1>Socket Test</h1>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:3000");
+
+    socket.on("connect", () => {
+      console.log("CLIENT CONNECTED:", socket.id);
+    });
+
+    socket.on("seatLocked", (seatId) => {
+      console.log("LOCKED:", seatId);
+    });
+
+    socket.on("seatUnlocked", (seatId) => {
+      console.log("UNLOCKED:", seatId);
+    });
+
+    // test
+    setTimeout(() => {
+      socket.emit("lockSeat", { seatId: "A1", userId: "u1" });
+    }, 2000);
+  </script>
+</body>
+</html>
