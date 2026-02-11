@@ -7,15 +7,9 @@ const movieticketSchema = mongoose.Schema({
     required: true,
   },
 
-  MovieId: {
+  ShowId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Movie",
-    required: true,
-  },
-
-  CinemaId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Cinema",
+    ref: "Show",
     required: true,
   },
 

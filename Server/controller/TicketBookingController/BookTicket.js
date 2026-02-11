@@ -30,7 +30,7 @@ export async function calculateTotal(req, res) {
       pricePerSeat: show.pricePerSeat,
       totalPrice
     });
-
+     
   } catch (err) {
     return res.status(500).json({ message: "error calculating total" });
   }

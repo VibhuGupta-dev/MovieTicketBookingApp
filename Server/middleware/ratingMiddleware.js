@@ -1,7 +1,6 @@
 export function attachMovieAndUser(req, res, next) {
   const movieId = req.params.movieId;
-  const userId = req.userId; // coming from auth middleware (cookie-parser + jwt)
-
+  const userId = req.userId; 
   if (!movieId) {
     return res.status(400).json({ message: "movieId missing in params" });
   }
