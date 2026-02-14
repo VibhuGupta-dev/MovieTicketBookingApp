@@ -1,10 +1,11 @@
-const API_KEY = "4fee456bdb5832b54a5826be3b4d60b24b767ea345c08d64420b2de20e96fb0a"
+const API_KEY = import.meta.env.VITE_CITY_API;
 const BASE_URL = 'https://api.countrystatecity.in/v1';
+
 
 export const getCitiesByState = async (countryCode, stateCode) => {
   try {
     console.log(`Fetching cities for ${countryCode}/${stateCode}...`);
-    
+    console.log(import.meta.env.VITE_API_KEY);
     const response = await fetch(
       `${BASE_URL}/countries/${countryCode}/states/${stateCode}/cities`, 
       {
