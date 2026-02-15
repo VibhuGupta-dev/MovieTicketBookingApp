@@ -6,10 +6,6 @@ export async function getmovie(req , res) {
      if(!movieId) {
         return res.status(400).json({message : "no movieId"})
      }
-     const userID = req.userID
-     if(!userID) {
-       return res.status(400).json({message : "no userid"})
-     }
      const movie = await Movie.findById(movieId)
      if(!movie){
         return res.status(400).json({message : "no movie found"})

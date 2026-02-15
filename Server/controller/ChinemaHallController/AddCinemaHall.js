@@ -19,15 +19,39 @@ function generateRowLabels(count) {
 
 export async function addChinemaHall(req, res) {
   try {
-    const { cinemaHallName, description, locationLink, address, logo, row, seatsPerRow , RatePerSeat } = req.body;
+    const {
+      cinemaHallName,
+      description,
+      locationLink,
+      address,
+      logo,
+      row,
+      seatsPerRow,
+      RatePerSeat,
+      location,
+      CityId,
+      StateId,
+    } = req.body;
 
-    if (!cinemaHallName || !description || !locationLink || !address || !logo || !row || !seatsPerRow || !RatePerSeat) {
+    if (
+      !cinemaHallName ||
+      !description ||
+      !locationLink ||
+      !address ||
+      !logo ||
+      !row ||
+      !seatsPerRow ||
+      !RatePerSeat ||
+      !location
+    ) {
       return res.status(400).json({ message: "all fields not filled" });
     }
 
     const rows = Number(row);
-    if(rows > 50) {
-        return res.status(400).json({messaage : "more than 50 rows are not allowed"})
+    if (rows > 50) {
+      return res
+        .status(400)
+        .json({ messaage: "more than 50 rows are not allowed" });
     }
     const seatsPerRowNum = Number(seatsPerRow);
 
@@ -40,7 +64,7 @@ export async function addChinemaHall(req, res) {
         seats.push({
           seatno: rowLabels[i] + j,
           isBooked: false,
-          rate: RatePerSeat
+          rate: RatePerSeat,
         });
       }
     }
@@ -48,17 +72,19 @@ export async function addChinemaHall(req, res) {
     const cinemaHall = await Cinema.create({
       userId: req.userId,
       row: rows,
+      location,
       seatsPerRow: seatsPerRowNum,
       seats,
       cinemaHallName,
       description,
       locationLink,
       address,
-      logo
+      logo,
+      CityId,
+      StateId,
     });
 
     return res.status(201).json({ message: "cinema hall created", cinemaHall });
-
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "error in add cinema hall" });

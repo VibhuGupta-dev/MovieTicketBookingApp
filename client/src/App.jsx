@@ -1,11 +1,20 @@
-import Navbar from "./Components/Navbar"
-import { MoviePage } from "./Page/MoviePage"
-export default function App() {
+import Navbar from "./Components/Navbar";
+import { MoviePage } from "./Page/MoviePage";
+import { Routes, Route } from "react-router-dom";
+import { MovieInfoPage } from "./Page/MovieInfoPage";
+import { AllCinemaPage } from "./Page/AllCinemaPage";
+import { ThemeProvider } from "./Components/ThemeContext";
 
-  return <>
-     <div className="w-full h-dvh  bg-purple-100">
-       
-<MoviePage />
-     </div>
-  </>
+export default function App() {
+  return (
+    <ThemeProvider>
+      <div className="w-full min-h-screen bg-white dark:bg-gray-900 transition-colors">
+        <Routes>
+          <Route path="/" element={<MoviePage />} />
+          <Route path="/Movie/:id" element={<MovieInfoPage />} />
+          <Route path="/cinema" element={<AllCinemaPage />} />
+        </Routes>
+      </div>
+    </ThemeProvider>
+  );
 }
