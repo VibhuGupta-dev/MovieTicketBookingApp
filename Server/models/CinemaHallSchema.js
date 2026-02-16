@@ -15,13 +15,11 @@ const CinemaHallSchema = new mongoose.Schema(
     row: Number,
     seatsPerRow: Number,
     StateId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "State",
+      type: String,  // Changed from ObjectId to String
       required: true,
     },
     CityId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "City",
+      type: String,  // Changed from ObjectId to String
       required: true,
     },
     seats: [
@@ -30,12 +28,14 @@ const CinemaHallSchema = new mongoose.Schema(
         rate: { type: Number },
       },
     ],
-
     cinemaHallName: String,
     description: String,
     locationLink: String,
     address: String,
-
+    location: {
+      latitude: String,
+      longitude: String,
+    },
     logo: String,
   },
   { timestamps: true },

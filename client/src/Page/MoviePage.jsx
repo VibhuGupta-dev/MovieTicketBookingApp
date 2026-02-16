@@ -4,6 +4,19 @@ import axios from "axios";
 import AllMovies from "../Components/AllMovies";
 
 export function MoviePage() {
+  // ===== DEBUG CONSOLE 1: Component Mount =====
+  console.log("🎬 MoviePage: Component rendering/re-rendering");
+
+  // ===== ADDED: State for location IDs (MAIN FIX) =====
+  const [selectedStateId, setSelectedStateId] = useState(null);
+  const [selectedCityId, setSelectedCityId] = useState(null);
+
+  // ===== DEBUG CONSOLE 2: Check state functions =====
+  console.log("🔍 MoviePage: setSelectedStateId type =", typeof setSelectedStateId);
+  console.log("🔍 MoviePage: setSelectedCityId type =", typeof setSelectedCityId);
+  console.log("📍 MoviePage: Current selectedStateId =", selectedStateId);
+  console.log("📍 MoviePage: Current selectedCityId =", selectedCityId);
+
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,6 +26,16 @@ export function MoviePage() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const sliderRef = useRef(null);
+
+  // ===== ADDED: Track when location changes =====
+  useEffect(() => {
+    if (selectedStateId && selectedCityId) {
+      console.log("✅ MoviePage: Location changed!");
+      console.log("   → State ID:", selectedStateId);
+      console.log("   → City ID:", selectedCityId);
+      // Yahan tum future mein API call kar sakte ho location ke basis pe movies filter karne ke liye
+    }
+  }, [selectedStateId, selectedCityId]);
 
   const prevSlide = () => {
     setCurrent((prev) => (prev === 0 ? movies.length - 1 : prev - 1));
@@ -26,7 +49,6 @@ export function MoviePage() {
     setCurrent(index);
   };
 
-  // Handle touch events for mobile swipe
   const handleTouchStart = (e) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -44,7 +66,6 @@ export function MoviePage() {
     }
   };
 
-  // Auto slide
   useEffect(() => {
     if (movies.length === 0 || !isAutoPlaying) return;
 
@@ -55,17 +76,25 @@ export function MoviePage() {
     return () => clearInterval(interval);
   }, [movies, current, isAutoPlaying]);
 
-  // Fetch movies
   useEffect(() => {
     const fetchMovies = async () => {
+      // ===== DEBUG CONSOLE 3: API Call =====
+      console.log("🌐 MoviePage: Fetching movies from API...");
+      
       try {
         const response = await axios.get(
           "http://localhost:3000/movie/api/allmovie",
         );
+        
+        // ===== DEBUG CONSOLE 4: API Response =====
+        console.log("✅ MoviePage: Movies fetched successfully!");
+        console.log("   → Total movies:", response.data.length);
+        
         setMovies(response.data || []);
         setTotalMovies(response.data.length);
       } catch (err) {
-        console.error("Failed to fetch movies:", err);
+        // ===== DEBUG CONSOLE 5: API Error =====
+        console.error("❌ MoviePage: Failed to fetch movies:", err);
         setError(err);
       } finally {
         setIsLoading(false);
@@ -75,32 +104,47 @@ export function MoviePage() {
     fetchMovies();
   }, []);
 
-  if (isLoading)
+  if (isLoading) {
+    // ===== DEBUG CONSOLE 6: Loading State =====
+    console.log("⏳ MoviePage: Showing loading state");
+    
     return (
       <>
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900 transition-colors">
+        {/* ===== FIX: Added props to Navbar ===== */}
+        <Navbar 
+          setSelectedStateId={setSelectedStateId}
+          setSelectedCityId={setSelectedCityId}
+        />
+        <div className="flex items-center justify-center min-h-screen bg-white">
           <div className="text-center">
             <div className="inline-block h-16 w-16 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">
+            <p className="text-gray-600 text-lg font-medium">
               Loading movies...
             </p>
           </div>
         </div>
       </>
     );
+  }
 
-  if (error)
+  if (error) {
+    // ===== DEBUG CONSOLE 7: Error State =====
+    console.log("⚠️ MoviePage: Showing error state");
+    
     return (
       <>
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900 transition-colors">
+        {/* ===== FIX: Added props to Navbar ===== */}
+        <Navbar 
+          setSelectedStateId={setSelectedStateId}
+          setSelectedCityId={setSelectedCityId}
+        />
+        <div className="flex items-center justify-center min-h-screen bg-white">
           <div className="text-center max-w-md mx-4">
             <div className="text-6xl mb-4">🎬</div>
-            <div className="text-red-600 dark:text-red-400 text-2xl font-bold mb-2">
+            <div className="text-red-600 text-2xl font-bold mb-2">
               Oops! Something went wrong
             </div>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600">
               {error.message ||
                 "Unable to load movies. Please try again later."}
             </p>
@@ -114,20 +158,28 @@ export function MoviePage() {
         </div>
       </>
     );
+  }
+
+  // ===== DEBUG CONSOLE 8: Main Render =====
+  console.log("🎨 MoviePage: Rendering main content with", movies.length, "movies");
 
   return (
     <>
-      <Navbar />
+      {/* ===== MAIN FIX: Line 78 - Added props to Navbar ===== */}
+      <Navbar 
+        setSelectedStateId={setSelectedStateId}
+        setSelectedCityId={setSelectedCityId}
+      />
 
       {/* Hero Slider Section */}
       <div
         ref={sliderRef}
-        className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden bg-black dark:bg-black"
+        className="relative w-full h-[600px] md:h-[600px] lg:h-[700px] overflow-hidden bg-black"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Left Button - Hidden on Mobile */}
+        {/* Left Button */}
         <button
           onClick={prevSlide}
           onMouseEnter={() => setIsAutoPlaying(false)}
@@ -159,33 +211,24 @@ export function MoviePage() {
               key={movie._id || index}
               className="min-w-full relative h-full"
             >
-              {/* Background Image */}
               <div className="absolute inset-0">
                 <img
                   src={movie.MovieBackgroundPhoto || movie.MoviePhoto}
                   alt={movie.MovieName}
                   className="w-full h-full object-cover"
-                  style={{
-                    transform: current === index ? "scale(1)" : "scale(1)",
-                    transition: "transform 10s ease-out",
-                  }}
                 />
-                {/* Gradient Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 md:via-black/80 to-black/70 md:to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
               </div>
 
-              {/* Content */}
               <div className="relative h-full flex items-end md:items-center px-4 md:px-6 lg:px-20 pb-24 md:pb-0">
                 <div className="flex flex-col md:flex-row gap-4 md:gap-8 lg:gap-12 items-center md:items-end max-w-7xl w-full">
-                  {/* Poster */}
                   <div className="relative group flex-shrink-0">
                     <img
                       src={movie.MoviePhoto}
                       alt={movie.MovieName}
                       className="w-32 h-48 sm:w-40 sm:h-60 md:w-48 md:h-72 lg:w-64 lg:h-96 object-cover rounded-xl md:rounded-2xl shadow-2xl transform group-hover:scale-105 transition-transform duration-500 border-2 md:border-4 border-white/20"
                     />
-                    {/* Rating Badge */}
                     {movie.rating && (
                       <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-yellow-500 text-black font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg shadow-lg flex items-center gap-1">
                         <svg
@@ -201,13 +244,11 @@ export function MoviePage() {
                     )}
                   </div>
 
-                  {/* Movie Info */}
                   <div className="text-white max-w-2xl text-center md:text-left w-full">
                     <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black mb-2 md:mb-4 drop-shadow-2xl leading-tight line-clamp-2">
                       {movie.MovieName}
                     </h1>
 
-                    {/* Meta Info */}
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-4 md:mb-6">
                       {movie.Moviegenre && (
                         <span className="bg-purple-600 px-3 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-semibold shadow-lg">
@@ -250,14 +291,12 @@ export function MoviePage() {
                       )}
                     </div>
 
-                    {/* Description */}
                     {movie.MovieDescription && (
                       <p className="hidden sm:block text-sm md:text-base lg:text-lg text-gray-200 mb-4 md:mb-8 leading-relaxed line-clamp-2 md:line-clamp-3 drop-shadow-lg">
                         {movie.MovieDescription}
                       </p>
                     )}
 
-                    {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start">
                       <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 md:py-4 md:px-8 rounded-lg md:rounded-xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 md:gap-3 group w-full sm:w-auto">
                         <svg
@@ -426,9 +465,9 @@ export function MoviePage() {
       </div>
 
       {/* All Movies Section */}
-      <div className="bg-white dark:bg-gray-900 transition-colors">
+      <div className="bg-white">
         <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-gray-900 dark:text-gray-100">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-gray-900">
             All Movies ({totalMovies})
           </h2>
 

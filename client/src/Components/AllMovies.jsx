@@ -64,7 +64,7 @@ export default function AllMovies() {
           onClick={() => handleOnClick(movie._id)}
           className="cursor-pointer group"
         >
-          <div className="relative mb-3 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+          <div className="relative mb-3 bg-black rounded-lg overflow-hidden">
             <img
               className="w-full aspect-[2/3] object-cover transition-transform group-hover:scale-105"
               src={movie.MoviePhoto}
@@ -72,7 +72,7 @@ export default function AllMovies() {
             />
           </div>
           
-          <h2 className="text-base font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">
+          <h2 className="text-base font-medium text-gray-900  mb-1 line-clamp-2">
             {movie.title || movie.MovieName || "Untitled"}
           </h2>
           
