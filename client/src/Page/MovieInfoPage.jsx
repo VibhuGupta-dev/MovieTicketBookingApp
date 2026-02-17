@@ -2,13 +2,25 @@ import Navbar from "../Components/Navbar";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-
+import Calendar from "../api/Dates";
 export function MovieInfoPage() {
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
+ 
+function formatDateLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+const today = formatDateLocal(new Date());
+
+
+
 
   useEffect(() => {
     let mounted = true;
@@ -38,7 +50,7 @@ export function MovieInfoPage() {
   }, [id]);
 
   const handleBookSeats = () => {
-    navigate('/cinema', { state: { movieId: id, movieName: movie?.MovieName } });
+    navigate(`/${id}/cinemas/${today}`, { state: { movieId: id, movieName: movie?.MovieName } });
   };
 
   if (isLoading)

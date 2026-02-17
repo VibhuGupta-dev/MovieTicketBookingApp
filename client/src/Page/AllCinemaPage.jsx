@@ -1,6 +1,3 @@
-// ============================================
-// ALTERNATIVE: AllCinemaPage.jsx (using GET method)
-// ============================================
 import { useState, useEffect } from "react";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
@@ -14,10 +11,6 @@ export function AllCinemaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  console.log("🔍 AllCinemaPage: setSelectedStateId type =", typeof setSelectedStateId);
-  console.log("🔍 AllCinemaPage: setSelectedCityId type =", typeof setSelectedCityId);
-  console.log("📍 AllCinemaPage: Current selectedStateId =", selectedStateId);
-  console.log("📍 AllCinemaPage: Current selectedCityId =", selectedCityId);
 
   useEffect(() => {
     if (!selectedStateId || !selectedCityId) {

@@ -31,6 +31,7 @@ export async function addChinemaHall(req, res) {
       location,
       CityId,
       StateId,
+      MovieId
     } = req.body;
 
     if (
@@ -82,6 +83,7 @@ export async function addChinemaHall(req, res) {
       logo,
       CityId,
       StateId,
+      MovieId
     });
 
     return res.status(201).json({ message: "cinema hall created", cinemaHall });

@@ -1,21 +1,25 @@
 import Cinema from "../../models/CinemaHallSchema.js";
 
-export async function ReadcinemaWithLocation(req, res) {
+export async function ReadcinemaWithLocationAndMovieId(req, res) {
   try {
+    const MovieId = req.params.MovieId;
     const { StateId, CityId } = req.query;
 
-    if (!StateId || !CityId) {
-      return res.status(400).json({ message: "both state and city needed" });
+    if (!MovieId) {
+      return res.status(400).json({ message: "movie id not there" });
     }
 
-    const cinema = await Cinema.find({ StateId, CityId });
+    const cinema = await Cinema.find({
+      CityId,
+      StateId,
+      "MovieId.MovieId": MovieId   
+    });
 
-    if (cinema.length === 0) {
-      return res.status(404).json({ message: "no cinema found" });
-    }
-
-    return res.status(200).json(cinema);
+    res.status(200).json(cinema);
   } catch (err) {
-    return res.status(500).json({ message: "error in ReadcinemaWithLocation" });
+    console.log(err);
+    return res
+      .status(500)
+      .json({ message: "error in ReadcinemaWithLocationAndMovieId" });
   }
 }

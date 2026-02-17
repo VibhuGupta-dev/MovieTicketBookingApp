@@ -6,13 +6,11 @@ import locationIcon from "../assets/location.png";
 import { getCitiesByState, getStatesByCountry, testApiKey } from "../api/GetStatesByCountry";
 
 export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
-  // ===== DEBUG CONSOLE 1 =====
-  console.log("🧭 Navbar: Component rendering");
+
 
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   
-  // ===== CHANGED: Initialize from localStorage =====
   const [selectedState, setSelectedState] = useState(() => {
     const saved = localStorage.getItem("selectedState");
     console.log("📦 Loading saved state from localStorage:", saved);
@@ -55,9 +53,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     else navigate("/");
   };
 
-  // ────────────────────────────────────────────────
-  //  Load states on mount
-  // ────────────────────────────────────────────────
   useEffect(() => {
     const initializeLocation = async () => {
       setLoading(true);
@@ -77,7 +72,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
         setStates(statesData);
         console.log("✅ States loaded:", statesData.length);
 
-        // ===== CHANGED: Check if saved state exists in API data =====
         const savedState = localStorage.getItem("selectedState");
         if (savedState) {
           const parsedState = JSON.parse(savedState);
@@ -87,7 +81,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
             console.log("✅ Saved state found in API, using saved state:", parsedState.name);
             setSelectedState(parsedState);
             
-            // ===== IMPORTANT: Update parent with saved IDs =====
+
             if (setSelectedStateId && parsedState.id) {
               setSelectedStateId(parsedState.id);
               console.log("✅ Updated parent with saved State ID:", parsedState.id);
@@ -114,9 +108,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     initializeLocation();
   }, []);
 
-  // ────────────────────────────────────────────────
-  //  Load cities when state changes
-  // ────────────────────────────────────────────────
   useEffect(() => {
     if (!selectedState?.iso2) return;
 
@@ -136,8 +127,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
         if (cityExists) {
           console.log("✅ Saved city found in API, using saved city:", savedCity);
           setSelectedCity(savedCity);
-          
-          // ===== IMPORTANT: Update parent with saved IDs =====
+         
           if (setSelectedCityId && cityExists.id) {
             setSelectedCityId(cityExists.id);
             console.log("✅ Updated parent with saved City ID:", cityExists.id);
@@ -169,9 +159,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     fetchCities();
   }, [selectedState?.iso2]);
 
-  // ────────────────────────────────────────────────
-  //  Close dropdown on outside click (desktop)
-  // ────────────────────────────────────────────────
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -186,16 +174,13 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     }
   }, []);
 
-  // ────────────────────────────────────────────────
-  //  Handlers
-  // ────────────────────────────────────────────────
+
   const handleStateSelect = (state) => {
     console.log("🔄 State changed to:", state.name);
     
     setSelectedState(state);
     setSelectedStateId(state.id);
-    
-    // ===== SAVE to localStorage =====
+  
     localStorage.setItem("selectedState", JSON.stringify(state));
     console.log("💾 Saved state to localStorage:", state.name);
     
@@ -256,9 +241,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     state.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ────────────────────────────────────────────────
-  //  Dropdown Content (shared mobile + desktop)
-  // ────────────────────────────────────────────────
+
   const DropdownContent = () => (
     <>
       <div className="flex border-b border-gray-200">
@@ -476,7 +459,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
           </nav>
         </div>
 
-        {/* ── Desktop ─────────────────────────────────────── */}
+      
         <div className="hidden md:flex items-center justify-between px-4 lg:px-6 h-24">
           <div className="flex items-center gap-4">
             <div className="h-20 pt-3 w-20 py-2 cursor-pointer" onClick={() => handleNavigate("Movies")}>
@@ -485,7 +468,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
 
             <div className="h-12 w-px bg-gray-200" />
 
-            {/* Location dropdown */}
+          
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={handleDropdownToggle}
@@ -569,7 +552,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
         </div>
       </header>
 
-      {/* Mobile full-screen dropdown */}
       {isDropdownOpen && (
         <div
           className="md:hidden fixed inset-0 z-50 bg-black/30"

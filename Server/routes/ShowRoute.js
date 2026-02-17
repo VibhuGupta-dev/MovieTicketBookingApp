@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post("/addshow/:cinemaId/:movieId", isownerloggedin, addshow);
 
-router.get("/getshow/:showId", getShow);
+router.get("/getshow/:MovieId/:date", getShow);
 
 router.put("/updateshow/:showId", isownerloggedin, updateShow);
 
