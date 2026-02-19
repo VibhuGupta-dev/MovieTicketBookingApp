@@ -1,12 +1,13 @@
+
 import mongoose from "mongoose";
 
 const showSchema = new mongoose.Schema({
-
   UserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
+
   movieId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Movie",
@@ -24,15 +25,11 @@ const showSchema = new mongoose.Schema({
     required: true,
   },
 
-  timeSlot: {
-    type: String, 
-    required: true,
-  },
-
-  bookedSeatIds: [
+  timeSlots: [
     {
-      type: mongoose.Schema.Types.ObjectId, 
-    },
+      time: { type: String, required: true },
+      bookedSeatIds: [{ type: mongoose.Schema.Types.ObjectId }],
+    }
   ],
 
   pricePerSeat: {
@@ -40,6 +37,7 @@ const showSchema = new mongoose.Schema({
     required: true,
   },
 });
+
 
 const Show = mongoose.model("Show", showSchema);
 export default Show;

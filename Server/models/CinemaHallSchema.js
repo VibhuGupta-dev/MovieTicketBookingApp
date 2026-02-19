@@ -15,11 +15,11 @@ const CinemaHallSchema = new mongoose.Schema(
     row: Number,
     seatsPerRow: Number,
     StateId: {
-      type: String,  // Changed from ObjectId to String
+      type: String,
       required: true,
     },
     CityId: {
-      type: String,  // Changed from ObjectId to String
+      type: String,
       required: true,
     },
     seats: [
