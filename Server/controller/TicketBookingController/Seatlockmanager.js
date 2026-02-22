@@ -2,7 +2,7 @@ const lockedSeats = new Map();
 
 export function lockSeat(seatId, userId, io) {
   if (lockedSeats.has(seatId)) return false;
-
+console.log(seatId)
   const timer = setTimeout(() => {
     lockedSeats.delete(seatId);
     io.emit("seatUnlocked", seatId);
