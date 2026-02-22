@@ -15,28 +15,37 @@ export function MovieHall() {
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [rate, setRate] = useState("");
+    const [rate, setRate] = useState(0); // plain number, not a seat object
     const [socketReady, setSocketReady] = useState(false);
-    const [lockedByMe, setLockedByMe] = useState([]); // seats locked by current user
-    const [timeLeft, setTimeLeft] = useState(null); // countdown in seconds
+    const [lockedByMe, setLockedByMe] = useState([]);
+    const [timeLeft, setTimeLeft] = useState(null);
     const [bookingConfirmed, setBookingConfirmed] = useState(false);
+    const [totalprice, setTotalprice] = useState(0); // restored from localStorage on mount
 
     const { cinemaId, date, time } = useParams();
     const navigate = useNavigate();
 
     const userId = "698ac9f71158649a28d9a9dd";
 
+    // Derived total price for the current selection (used before confirming)
+    const totalPrice = selectedSeats.length * (rate ?? 0);
+
+    // 1. Restore seat lock from localStorage
     useEffect(() => {
         const saved = localStorage.getItem("seatLock");
         if (saved) {
-            const { lockedSeats, expiresAt } = JSON.parse(saved);
-            const secondsLeft = Math.floor((expiresAt - Date.now()) / 1000);
-            if (secondsLeft > 0) {
-                setLockedByMe(lockedSeats);
-                setTimeLeft(secondsLeft);
-                setBookingConfirmed(true);
-            } else {
-                // timer already expired, clear it
+            try {
+                const { lockedSeats, expiresAt, totalPrice: savedPrice } = JSON.parse(saved);
+                const secondsLeft = Math.floor((expiresAt - Date.now()) / 1000);
+                if (secondsLeft > 0) {
+                    setLockedByMe(lockedSeats);
+                    setTimeLeft(secondsLeft);
+                    setBookingConfirmed(true);
+                    setTotalprice(savedPrice ?? 0); // ✅ safely restored from storage
+                } else {
+                    localStorage.removeItem("seatLock");
+                }
+            } catch {
                 localStorage.removeItem("seatLock");
             }
         }
@@ -70,12 +79,12 @@ export function MovieHall() {
                     seat._id === seatId ? { ...seat, locked: false } : seat
                 )
             );
-            // if my lock expired, clear everything
             setLockedByMe((prev) => {
                 const updated = prev.filter((id) => id !== seatId);
                 if (updated.length === 0) {
                     setTimeLeft(null);
                     setBookingConfirmed(false);
+                    setTotalprice(0);
                     localStorage.removeItem("seatLock");
                 }
                 return updated;
@@ -96,7 +105,7 @@ export function MovieHall() {
         };
     }, [socketReady]);
 
-    
+    // 4. Fetch cinema hall data
     useEffect(() => {
         if (!cinemaId) return;
         const fetchCinema = async () => {
@@ -112,7 +121,7 @@ export function MovieHall() {
                 setSeats(Array.isArray(seatsData) ? seatsData : []);
                 setSeatsPerRow(hallData?.seatsPerRow ?? 20);
                 setHallName(hallData?.cinemaHallName ?? "Movie Hall");
-                setRate(seatsData[0]);
+                setRate(seatsData[0]?.rate ?? 0); // store only the rate number
             } catch (err) {
                 setError(err?.message || "Failed to load Cinema");
             } finally {
@@ -122,7 +131,7 @@ export function MovieHall() {
         fetchCinema();
     }, [cinemaId]);
 
-    // 5. Countdown timer tick
+    // 5. Countdown timer
     useEffect(() => {
         if (timeLeft === null) return;
 
@@ -131,6 +140,7 @@ export function MovieHall() {
             setBookingConfirmed(false);
             setLockedByMe([]);
             setSelectedSeats([]);
+            setTotalprice(0);
             localStorage.removeItem("seatLock");
             alert("Your seat reservation has expired!");
             return;
@@ -167,23 +177,29 @@ export function MovieHall() {
     const handleConfirmBooking = () => {
         if (!socket.current || selectedSeats.length === 0) return;
 
-        // emit lock for each seat
         selectedSeats.forEach((seatId) => {
             socket.current.emit("lockSeat", { seatId, userId });
         });
 
-        // save to localStorage with expiry
         const expiresAt = Date.now() + LOCK_DURATION * 1000;
-        localStorage.setItem("seatLock", JSON.stringify({
-            lockedSeats: selectedSeats,
-            expiresAt,
-        }));
+
+        // ✅ Save totalPrice into localStorage so it survives a page refresh
+        localStorage.setItem(
+            "seatLock",
+            JSON.stringify({
+                lockedSeats: selectedSeats,
+                expiresAt,
+                totalPrice, // snapshot of derived value at the moment of confirmation
+            })
+        );
 
         setLockedByMe(selectedSeats);
         setTimeLeft(LOCK_DURATION);
-        setBookingConfirmed(true);
+        setTotalprice(totalPrice); // ✅ called inside a handler, not during render
+        navigate("/paynow")
+      
     };
-
+     
     const handleCancelLock = () => {
         if (!socket.current) return;
 
@@ -194,30 +210,35 @@ export function MovieHall() {
         setLockedByMe([]);
         setSelectedSeats([]);
         setTimeLeft(null);
+        setTotalprice(0);
         setBookingConfirmed(false);
         localStorage.removeItem("seatLock");
     };
-
+  
+    // Build rows
     const rows = [];
     for (let i = 0; i < seats.length; i += seatsPerRow) {
         rows.push(seats.slice(i, i + seatsPerRow));
     }
 
-    const totalPrice = selectedSeats.length * rate.rate;
     const aisleAfter = Math.floor(seatsPerRow / 2) - 1;
 
-    if (isLoading) return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-            <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-            <p className="text-purple-500 tracking-widest text-sm uppercase">Loading seats…</p>
-        </div>
-    );
+    if (isLoading)
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
+                <p className="text-purple-500 tracking-widest text-sm uppercase">
+                    Loading seats…
+                </p>
+            </div>
+        );
 
-    if (error) return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <p className="text-red-500 text-lg">⚠ {error}</p>
-        </div>
-    );
+    if (error)
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <p className="text-red-500 text-lg">⚠ {error}</p>
+            </div>
+        );
 
     return (
         <>
@@ -266,7 +287,11 @@ export function MovieHall() {
                             </p>
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                            <span className={`text-2xl font-bold tabular-nums ${timeLeft <= 60 ? "text-red-500" : "text-purple-600"}`}>
+                            <span
+                                className={`text-2xl font-bold tabular-nums ${
+                                    timeLeft <= 60 ? "text-red-500" : "text-purple-600"
+                                }`}
+                            >
                                 {formatTime(timeLeft)}
                             </span>
                             <button
@@ -282,19 +307,22 @@ export function MovieHall() {
                 {/* Screen */}
                 <div className="w-full max-w-3xl flex flex-col items-center mb-8 z-10 mt-4">
                     <div className="w-3/4 h-1.5 rounded-full bg-purple-400 shadow-[0_0_16px_rgba(168,85,247,0.4)]" />
-                    <p className="text-xs tracking-[0.4em] text-purple-400 uppercase mt-2 font-medium">Screen</p>
+                    <p className="text-xs tracking-[0.4em] text-purple-400 uppercase mt-2 font-medium">
+                        Screen
+                    </p>
                     <div
                         style={{
                             width: "75%",
                             height: "16px",
-                            background: "linear-gradient(to bottom, rgba(168,85,247,0.15), transparent)",
+                            background:
+                                "linear-gradient(to bottom, rgba(168,85,247,0.15), transparent)",
                             clipPath: "polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%)",
                         }}
                     />
                 </div>
 
                 {/* Rate */}
-                <div className="p-5 text-xl font-bold">Seats : ₹{rate.rate}</div>
+                <div className="p-5 text-xl font-bold">Seats : ₹{rate}</div>
 
                 {/* Seat Grid */}
                 <div className="flex flex-col gap-1.5 z-10 overflow-x-auto w-full items-center bg-gray-50 rounded-2xl shadow-sm p-6">
@@ -306,7 +334,8 @@ export function MovieHall() {
 
                             {row.map((seat, idx) => {
                                 const seatKey = seat._id;
-                                const label = seat?.seatNo ?? seat?.number ?? seat?.label ?? `${idx + 1}`;
+                                const label =
+                                    seat?.seatNo ?? seat?.number ?? seat?.label ?? `${idx + 1}`;
                                 const isBooked = seat?.locked ?? seat?.isBooked ?? false;
                                 const isSelected = selectedSeats.includes(seatKey);
                                 const isLockedByMe = lockedByMe.includes(seatKey);
@@ -315,14 +344,17 @@ export function MovieHall() {
                                     "relative flex-shrink-0 w-7 h-6 md:w-8 md:h-7 rounded-t-md text-[9px] font-semibold transition-all duration-150 border-b-2 cursor-pointer outline outline-1 ";
 
                                 if (isLockedByMe) {
-                                    // orange = locked by current user
-                                    seatClass += "bg-orange-400 border-b-orange-600 outline-orange-500 text-white cursor-not-allowed";
+                                    seatClass +=
+                                        "bg-orange-400 border-b-orange-600 outline-orange-500 text-white cursor-not-allowed";
                                 } else if (isBooked) {
-                                    seatClass += "bg-gray-100 border-b-gray-300 outline-gray-300 text-gray-300 cursor-not-allowed";
+                                    seatClass +=
+                                        "bg-gray-100 border-b-gray-300 outline-gray-300 text-gray-300 cursor-not-allowed";
                                 } else if (isSelected) {
-                                    seatClass += "bg-purple-500 border-b-purple-600 outline-purple-700 text-white scale-110";
+                                    seatClass +=
+                                        "bg-purple-500 border-b-purple-600 outline-purple-700 text-white scale-110";
                                 } else {
-                                    seatClass += "bg-white border-b-gray-500 outline-gray-300 text-gray-500 hover:bg-purple-50 hover:outline-purple-300 hover:border-b-purple-300 hover:text-purple-600 hover:scale-105";
+                                    seatClass +=
+                                        "bg-white border-b-gray-500 outline-gray-300 text-gray-500 hover:bg-purple-50 hover:outline-purple-300 hover:border-b-purple-300 hover:text-purple-600 hover:scale-105";
                                 }
 
                                 return (
@@ -371,12 +403,13 @@ export function MovieHall() {
                     </div>
                 </div>
 
-                {/* Booking bar */}
-                {selectedSeats.length > 0 && !bookingConfirmed && (
+                {/* Confirm Booking bar — shown before locking */}
+                
                     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
                         <div>
                             <p className="text-purple-500 text-xs uppercase tracking-widest font-medium">
-                                {selectedSeats.length} seat{selectedSeats.length > 1 ? "s" : ""} selected
+                                {selectedSeats.length} seat{selectedSeats.length > 1 ? "s" : ""}{" "}
+                                selected
                             </p>
                             <p className="text-gray-900 text-2xl font-bold">
                                 ₹{totalPrice.toLocaleString()}
@@ -389,27 +422,35 @@ export function MovieHall() {
                             Confirm Booking →
                         </button>
                     </div>
-                )}
+                
 
-                {/* Pay now bar — shown after locking */}
-                {bookingConfirmed && timeLeft !== null && (
-                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
-                        <div>
-                            <p className="text-orange-500 text-xs uppercase tracking-widest font-medium">
-                                Seats locked · expires in {formatTime(timeLeft)}
-                            </p>
-                            <p className="text-gray-900 text-2xl font-bold">
-                                ₹{totalPrice.toLocaleString()}
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => alert("Proceed to payment!")}
-                            className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-3 rounded-xl tracking-wide uppercase text-sm border border-green-600 shadow-md transition-all duration-150"
-                        >
-                            Pay Now →
-                        </button>
-                    </div>
-                )}
+       
+{bookingConfirmed && lockedByMe.length > 0 && (
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
+        <div>
+            <p className="text-orange-500 text-xs uppercase tracking-widest font-medium">
+                {lockedByMe.length} seat{lockedByMe.length > 1 ? "s" : ""} locked · expires in {formatTime(timeLeft)}
+            </p>
+            <p className="text-gray-900 text-2xl font-bold">
+                ₹{totalprice.toLocaleString()}
+            </p>
+        </div>
+        <div className="flex gap-3">
+            <button
+                onClick={handleCancelLock}
+                className="text-sm text-gray-400 hover:text-red-500 underline transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                onClick={() => navigate("/paynow")}
+                className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-3 rounded-xl tracking-wide uppercase text-sm border border-green-600 shadow-md transition-all duration-150"
+            >
+                Pay Now →
+            </button>
+        </div>
+    </div>
+)}
             </div>
         </>
     );

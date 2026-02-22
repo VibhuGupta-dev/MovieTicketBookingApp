@@ -12,14 +12,12 @@ export function AllcinemaMoviebased() {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const { id, date } = useParams();
   const navigate = useNavigate();
 
-  const handleTimeSlotClick = (time, cinemaId) => {
-    navigate(`/${id}/cinema/${cinemaId}/${date}/${time}`);
+  const handleTimeSlotClick = (timeId, cinemaId , showId) => {
+    navigate(`/${id}/cinema/${cinemaId}/${date}/${timeId}/${showId}`);
   };
-
   useEffect(() => {
     if (!selectedStateId || !selectedCityId) return;
 
@@ -36,13 +34,18 @@ export function AllcinemaMoviebased() {
             },
           }
         );
-
-        const data = response.data || [];
+        
+        const data  = response.data || [];
         const uniqueShows = Array.from(
           new Map(data.map((item) => [item.cinemaId?._id, item])).values()
         );
 
         setShows(uniqueShows);
+        const showid = uniqueShows
+        console.log(showid)
+      
+               
+
       } catch (err) {
         setError(err.message || "Failed to load shows");
       } finally {
@@ -52,6 +55,8 @@ export function AllcinemaMoviebased() {
 
     fetchShows();
   }, [id, date, selectedStateId, selectedCityId]);
+
+
 
   return (
     <>
@@ -155,7 +160,7 @@ export function AllcinemaMoviebased() {
                           <button
                             key={i}
                             onClick={() =>
-                              handleTimeSlotClick(slot.time, showItem.cinemaId._id)
+                              handleTimeSlotClick(slot._id, showItem.cinemaId._id , showItem._id )
                             }
                             className="px-4 py-1.5 rounded-full border border-purple-200 text-purple-700 text-sm font-medium bg-purple-50 hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all duration-150 active:scale-95"
                           >

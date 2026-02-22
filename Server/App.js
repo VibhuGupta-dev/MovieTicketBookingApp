@@ -12,6 +12,8 @@ import { createServer } from "node:http"
 import { Server } from "socket.io"
 import { socketHandler } from "./controller/TicketBookingController/Lockticket.js"
 import paymentrouter from "./routes/PaymentRoutes.js"
+import seatbookinrouter from "./routes/SeatBookRoutes.js"
+
 const PORT = 3000
 const app = express()
 export const server = createServer(app)
@@ -47,6 +49,9 @@ app.use('/rate' , movierateing)
 app.use('/ticket' , ticketrouter)
 app.use('/show' , showroute)
 app.use('/payment' , paymentrouter)
+app.use('/seat' , seatbookinrouter)
+
+
 server.listen(PORT, () => {
   console.log(`server running on ${PORT}`)
 })

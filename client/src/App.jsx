@@ -14,7 +14,7 @@ export default function App() {
         <Route path="/Movie/:id" element={<MovieInfoPage />} />
         <Route path="/cinema" element={<AllCinemaPage />} />
         <Route path="/:id/cinemas/:date" element={<AllcinemaMoviebased />} /> 
-        <Route path="/:id/cinema/:cinemaId/:date/:time" element={<MovieHall />} />
+        <Route path="/:id/cinema/:cinemaId/:date/:timeId/:showId" element={<MovieHall />} />
       </Routes>
     </div>
   );
