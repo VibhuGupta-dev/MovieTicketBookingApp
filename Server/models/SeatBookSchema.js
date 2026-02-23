@@ -11,17 +11,15 @@ const seatBookingSchema = mongoose.Schema({
         ref: "TimeSlot",
         required: true,
     },
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
     seatsId: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Seat",
         }
     ],
+    BookingRefrence : {
+        type : String
+    },
     isBooked: {
         type: Boolean,
         default: false,  

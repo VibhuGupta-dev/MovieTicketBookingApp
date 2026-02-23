@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Calendar from "../api/Dates";
+
+
 export function MovieInfoPage() {
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +52,10 @@ const today = formatDateLocal(new Date());
   }, [id]);
 
   const handleBookSeats = () => {
-    navigate(`/${id}/cinemas/${today}`, { state: { movieId: id, movieName: movie?.MovieName } });
+
+navigate(`/${id}/cinemas/${today}`, { 
+  state: { movieId: id, movieName: movie?.MovieName } 
+});
   };
 
   if (isLoading)

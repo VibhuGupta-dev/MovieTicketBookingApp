@@ -15,22 +15,19 @@ export function MovieHall() {
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [rate, setRate] = useState(0); // plain number, not a seat object
+    const [rate, setRate] = useState(0); 
     const [socketReady, setSocketReady] = useState(false);
     const [lockedByMe, setLockedByMe] = useState([]);
     const [timeLeft, setTimeLeft] = useState(null);
     const [bookingConfirmed, setBookingConfirmed] = useState(false);
-    const [totalprice, setTotalprice] = useState(0); // restored from localStorage on mount
-
-    const { cinemaId, date, time } = useParams();
+    const [totalprice, setTotalprice] = useState(0); 
+    const { cinemaId, date , timeId ,showId} = useParams();
     const navigate = useNavigate();
 
     const userId = "698ac9f71158649a28d9a9dd";
 
-    // Derived total price for the current selection (used before confirming)
     const totalPrice = selectedSeats.length * (rate ?? 0);
 
-    // 1. Restore seat lock from localStorage
     useEffect(() => {
         const saved = localStorage.getItem("seatLock");
         if (saved) {
@@ -41,7 +38,7 @@ export function MovieHall() {
                     setLockedByMe(lockedSeats);
                     setTimeLeft(secondsLeft);
                     setBookingConfirmed(true);
-                    setTotalprice(savedPrice ?? 0); // ✅ safely restored from storage
+                    setTotalprice(savedPrice ?? 0); 
                 } else {
                     localStorage.removeItem("seatLock");
                 }
@@ -61,7 +58,6 @@ export function MovieHall() {
         };
     }, []);
 
-    // 3. Socket listeners
     useEffect(() => {
         if (!socketReady || !socket.current) return;
 
@@ -105,7 +101,6 @@ export function MovieHall() {
         };
     }, [socketReady]);
 
-    // 4. Fetch cinema hall data
     useEffect(() => {
         if (!cinemaId) return;
         const fetchCinema = async () => {
@@ -174,32 +169,51 @@ export function MovieHall() {
         );
     };
 
-    const handleConfirmBooking = () => {
-        if (!socket.current || selectedSeats.length === 0) return;
+const handleConfirmBooking = async () => {
+    if (!socket.current || selectedSeats.length === 0) return;
+
+    try {
+        const response = await axios.post(
+            `http://localhost:3000/seat/api/bookseat/${showId}/${timeId}`,
+            { seatsId: selectedSeats },
+        );
+
+        const bookingData = response.data.booking;
+        const bookingId = bookingData._id; 
+
+        console.log("Booking ID:", bookingId);
 
         selectedSeats.forEach((seatId) => {
             socket.current.emit("lockSeat", { seatId, userId });
         });
 
         const expiresAt = Date.now() + LOCK_DURATION * 1000;
-
-        // ✅ Save totalPrice into localStorage so it survives a page refresh
         localStorage.setItem(
             "seatLock",
             JSON.stringify({
                 lockedSeats: selectedSeats,
                 expiresAt,
-                totalPrice, // snapshot of derived value at the moment of confirmation
+                totalPrice,
+                bookingId, 
             })
         );
 
         setLockedByMe(selectedSeats);
         setTimeLeft(LOCK_DURATION);
-        setTotalprice(totalPrice); // ✅ called inside a handler, not during render
-        navigate("/paynow")
-      
-    };
+        setTotalprice(totalPrice);
+        setBookingConfirmed(true);
+
+        navigate(`/PayOut/${showId}/${timeId}/${bookingId}`); // ✅ seedha variable use karo
+
+    } catch (err) {
+        console.error("Booking failed:", err);
+        alert(err?.response?.data?.message || "Booking failed. Please try again.");
+    }
+};
+
+  
      
+
     const handleCancelLock = () => {
         if (!socket.current) return;
 
@@ -267,7 +281,7 @@ export function MovieHall() {
                 {/* Header */}
                 <div className="text-center mb-8 z-10 bg-white rounded-2xl px-10 py-5 border border-gray-200 shadow-sm w-full max-w-lg">
                     <p className="text-purple-500 text-xs tracking-[0.25em] uppercase mb-1 font-medium">
-                        {date} &nbsp;·&nbsp; {time}
+                        {date} &nbsp;·&nbsp;
                     </p>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-widest uppercase">
                         {hallName}

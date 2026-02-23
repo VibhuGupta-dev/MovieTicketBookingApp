@@ -24,7 +24,7 @@ const showSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-
+ 
   timeSlots: [
     {
       time: { type: String, required: true },

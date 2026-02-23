@@ -38,3 +38,23 @@ export async function getShow(req, res) {
     return res.status(500).json({ message: "error in get show" });
   }
 }
+
+export async function getShowId(req , res) {
+   try {
+          const showId = req.params.showId
+
+          if(!showId) {
+              return res.status(400).json({message : "showid not found"})
+          }
+      
+          const show = await Show.find({_id : showId})
+          console.log(show)
+            if(!show) {
+              return res.status(400).json({message : "show not found"})
+            }
+  
+            return res.status(200).send(show)
+      }catch(err) {
+          return res.status(500).json({message : "error in getshowid"})
+      }
+}
