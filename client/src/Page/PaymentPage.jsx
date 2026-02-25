@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
 const API = "http://localhost:3000";
-const RAZORPAY_KEY = "rzp_test_SK1MdXLX3rzuA6"; // ✅ hardcoded
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID
 
 function loadRazorpayScript() {
   return new Promise((resolve) => {
@@ -19,7 +19,6 @@ function loadRazorpayScript() {
 export default function PaymentPage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-
   const [step, setStep] = useState("idle");
   const [seatIds, setSeatIds] = useState([]);
   const [total, setTotal] = useState(0);
@@ -137,6 +136,7 @@ export default function PaymentPage() {
       if (data.success) {
         setTicketId(data.ticketId);
         setQrCode(data.qrCode);
+
         localStorage.removeItem("seatLock");
         setStep("success");
       } else {
