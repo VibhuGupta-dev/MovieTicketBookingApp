@@ -1,9 +1,10 @@
-// controller/PaymentController/VerifyPayment.js
+
 import crypto from "crypto";
 import Order from "../../models/OrderModel.js";
 import Ticket from "../../models/MovieTicketBookingSchema.js";
 import SeatBooking from "../../models/SeatBookSchema.js";
 import User from "../../models/UserSchema.js";
+import Show from "../../models/ShowSchema.js"; // ✅ add karo
 import { io } from "../../App.js";
 import { generateQR } from "../../utils/qrgenrate.js";
 
@@ -29,12 +30,13 @@ export async function verifyPayment(req, res) {
       return res.status(400).json({ success: false, message: "Invalid signature" });
     }
 
-  
+    // ── Step 2: Find Order ──
     const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // ── Step 3: Already paid check ──
     if (order.status === "paid") {
       const existingTicket = await Ticket.findOne({ ShowId: order.showId, UserId: order.userId });
       return res.json({
@@ -45,9 +47,11 @@ export async function verifyPayment(req, res) {
       });
     }
 
+    // ── Step 4: Get TimeSlotId from SeatBooking ──
     const seatBooking = await SeatBooking.findOne({ ShowId: order.showId });
     const timeSlotId = seatBooking?.TimeSlotId ?? null;
 
+    // ── Step 5: Create Ticket ──
     const ticket = await Ticket.create({
       UserId: order.userId,
       ShowId: order.showId,
@@ -57,7 +61,7 @@ export async function verifyPayment(req, res) {
       isQRgenerated: false,
     });
 
-    
+    // ── Step 6: Generate QR ──
     const qrData = {
       ticketId: ticket._id,
       userId: ticket.UserId,
@@ -68,17 +72,33 @@ export async function verifyPayment(req, res) {
     };
 
     const qrImage = await generateQR(qrData);
-
-
     ticket.qrCode = qrImage;
     ticket.isQRgenerated = true;
     await ticket.save();
 
-
+    // ── Step 7: Update Order ──
     order.status = "paid";
     order.paymentId = razorpay_payment_id;
     await order.save();
 
+   
+    if (timeSlotId) {
+ 
+await Show.findByIdAndUpdate(
+  order.showId,
+  {
+    $addToSet: {  // ✅ duplicates automatically ignore hote hain
+      "timeSlots.$[slot].bookedSeatIds": { $each: order.seatIds },
+    },
+  },
+  {
+    arrayFilters: [{ "slot._id": ticket.TimeSlotId }],
+    new: true,
+  }
+);
+    }
+
+    // ── Step 9: Update SeatBooking ──
     if (seatBooking) {
       seatBooking.isBooked = true;
       seatBooking.isLocked = false;
@@ -87,8 +107,8 @@ export async function verifyPayment(req, res) {
       await seatBooking.save();
     }
 
+    // ── Step 10: Emit socket + update user ──
     io.emit("seatBooked", order.seatIds);
-
 
     await User.findByIdAndUpdate(userId, {
       $push: { orderHistory: { orderId: order._id, totalAmount: order.amount, status: "paid" } },

@@ -88,13 +88,12 @@ export default function PaymentPage() {
         { withCredentials: true }
       );
 
-      // ✅ Use backend amount as single source of truth
       setTotal(data.amount);
       setStep("paying");
 
       const options = {
         key: RAZORPAY_KEY,
-        amount: data.amount * 100,  // must match Razorpay order exactly
+        amount: data.amount * 100, 
         currency: data.currency || "INR",
         name: "CineBook",
         description: "Movie Ticket Booking",
@@ -120,36 +119,35 @@ export default function PaymentPage() {
     }
   }
 
-  async function handleVerify(response, showId) {
-    setStep("verifying");
-    try {
-      const { data } = await axios.post(
-        `${API}/payment/verify-payment/${showId}`,
-        {
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-        },
-        { withCredentials: true }
-      );
+ async function handleVerify(response, showId) {
+  setStep("verifying");
+  try {
+    const { data } = await axios.post(
+      `${API}/payment/verify-payment/${showId}`,
+      {
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+      },
+      { withCredentials: true }
+    );
 
-      if (data.success) {
-        setTicketId(data.ticketId);
-        setQrCode(data.qrCode);
-
-        localStorage.removeItem("seatLock");
-        setStep("success");
-      } else {
-        setErrorMsg("Payment verification failed");
-        setStep("error");
-      }
-    } catch (err) {
-      setErrorMsg(err?.response?.data?.message || "Verification error");
+    if (data.success) {
+      setTicketId(data.ticketId);
+      setQrCode(data.qrCode);
+      localStorage.removeItem("seatLock");
+      setStep("success");
+    } else {
+      setErrorMsg("Payment verification failed");
       setStep("error");
     }
+  } catch (err) {
+    setErrorMsg(err?.response?.data?.message || "Verification error");
+    setStep("error");
   }
+}
 
-  // ════════════ TIMER EXPIRED ════════════
+
   if (timerExpired && step !== "success") {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">

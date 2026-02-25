@@ -36,6 +36,7 @@ export function AllcinemaMoviebased() {
         );
         
         const data  = response.data || [];
+        console.log(data)
         const uniqueShows = Array.from(
           new Map(data.map((item) => [item.cinemaId?._id, item])).values()
         );

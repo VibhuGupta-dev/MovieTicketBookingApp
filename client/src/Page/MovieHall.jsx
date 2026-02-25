@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { connectWS } from "../api/ws";
 
 const ROW_LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-const LOCK_DURATION = 10 * 60; // 10 minutes in seconds
+const LOCK_DURATION = 10 * 60;
 
 export function MovieHall() {
     const socket = useRef(null);
@@ -15,30 +15,32 @@ export function MovieHall() {
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [rate, setRate] = useState(0); 
+    const [rate, setRate] = useState(0);
     const [socketReady, setSocketReady] = useState(false);
     const [lockedByMe, setLockedByMe] = useState([]);
     const [timeLeft, setTimeLeft] = useState(null);
     const [bookingConfirmed, setBookingConfirmed] = useState(false);
-    const [totalprice, setTotalprice] = useState(0); 
-    const { cinemaId, date , timeId ,showId} = useParams();
+    const [totalprice, setTotalprice] = useState(0);
+    const [bookinid, setBookingId] = useState('');
+    const { cinemaId, date, timeId, showId } = useParams();
     const navigate = useNavigate();
 
     const userId = "698ac9f71158649a28d9a9dd";
-
     const totalPrice = selectedSeats.length * (rate ?? 0);
 
+    // 1. Restore from localStorage
     useEffect(() => {
         const saved = localStorage.getItem("seatLock");
         if (saved) {
             try {
-                const { lockedSeats, expiresAt, totalPrice: savedPrice } = JSON.parse(saved);
+                const { lockedSeats, expiresAt, totalPrice: savedPrice, bookingId } = JSON.parse(saved);
                 const secondsLeft = Math.floor((expiresAt - Date.now()) / 1000);
                 if (secondsLeft > 0) {
                     setLockedByMe(lockedSeats);
                     setTimeLeft(secondsLeft);
                     setBookingConfirmed(true);
-                    setTotalprice(savedPrice ?? 0); 
+                    setTotalprice(savedPrice ?? 0);
+                    setBookingId(bookingId ?? ''); // ✅ restore bookingId
                 } else {
                     localStorage.removeItem("seatLock");
                 }
@@ -48,16 +50,56 @@ export function MovieHall() {
         }
     }, []);
 
-    // 2. Connect socket
+    // 2. Fetch cinema hall + show bookedSeatIds
+    useEffect(() => {
+        if (!cinemaId || !showId || !timeId) return;
+        const fetchData = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const cinemaRes = await axios.get(
+                    `http://localhost:3000/cinemahall/api/getcinemahall/${cinemaId}`
+                );
+                const hallData = Array.isArray(cinemaRes.data)
+                    ? cinemaRes.data[0]
+                    : cinemaRes.data;
+                let seatsData = hallData?.seats ?? [];
+                setSeatsPerRow(hallData?.seatsPerRow ?? 20);
+                setHallName(hallData?.cinemaHallName ?? "Movie Hall");
+                setRate(seatsData[0]?.rate ?? 0);
+
+                const showRes = await axios.get(
+                    `http://localhost:3000/show/getshow/${showId}`
+                );
+                const showData = Array.isArray(showRes.data) ? showRes.data[0] : showRes.data;
+                const timeSlot = showData?.timeSlots?.find(
+                    (slot) => String(slot._id) === String(timeId)
+                );
+                const bookedSeatIds = timeSlot?.bookedSeatIds?.map(String) ?? [];
+
+                seatsData = seatsData.map((seat) => ({
+                    ...seat,
+                    isBooked: bookedSeatIds.includes(String(seat._id)),
+                }));
+
+                setSeats(seatsData);
+            } catch (err) {
+                setError(err?.message || "Failed to load data");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [cinemaId, showId, timeId]);
+
+    // 3. Connect socket
     useEffect(() => {
         socket.current = connectWS();
         setSocketReady(true);
-
-        return () => {
-            socket.current.disconnect();
-        };
+        return () => socket.current.disconnect();
     }, []);
 
+    // 4. Socket listeners
     useEffect(() => {
         if (!socketReady || !socket.current) return;
 
@@ -94,57 +136,39 @@ export function MovieHall() {
             }
         });
 
+        socket.current.on("seatBooked", (bookedSeatIds) => {
+            setSeats((prev) =>
+                prev.map((seat) =>
+                    bookedSeatIds.map(String).includes(String(seat._id))
+                        ? { ...seat, isBooked: true, locked: false }
+                        : seat
+                )
+            );
+        });
+
         return () => {
             socket.current.off("seatLocked");
             socket.current.off("seatUnlocked");
             socket.current.off("lockResponse");
+            socket.current.off("seatBooked");
         };
     }, [socketReady]);
-
-    useEffect(() => {
-        if (!cinemaId) return;
-        const fetchCinema = async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const response = await axios.get(
-                    `http://localhost:3000/cinemahall/api/getcinemahall/${cinemaId}`
-                );
-                const data = response.data;
-                const hallData = Array.isArray(data) ? data[0] : data;
-                const seatsData = hallData?.seats ?? [];
-                setSeats(Array.isArray(seatsData) ? seatsData : []);
-                setSeatsPerRow(hallData?.seatsPerRow ?? 20);
-                setHallName(hallData?.cinemaHallName ?? "Movie Hall");
-                setRate(seatsData[0]?.rate ?? 0); // store only the rate number
-            } catch (err) {
-                setError(err?.message || "Failed to load Cinema");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchCinema();
-    }, [cinemaId]);
 
     // 5. Countdown timer
     useEffect(() => {
         if (timeLeft === null) return;
-
         if (timeLeft <= 0) {
             setTimeLeft(null);
             setBookingConfirmed(false);
             setLockedByMe([]);
             setSelectedSeats([]);
             setTotalprice(0);
+            setBookingId('');
             localStorage.removeItem("seatLock");
             alert("Your seat reservation has expired!");
             return;
         }
-
-        timerRef.current = setTimeout(() => {
-            setTimeLeft((prev) => prev - 1);
-        }, 1000);
-
+        timerRef.current = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
         return () => clearTimeout(timerRef.current);
     }, [timeLeft]);
 
@@ -156,94 +180,101 @@ export function MovieHall() {
 
     const toggleSeat = (seatKey, isBooked) => {
         if (isBooked || bookingConfirmed) return;
-
         const isAlreadySelected = selectedSeats.includes(seatKey);
-
         if (!isAlreadySelected && selectedSeats.length >= 10) {
             alert("You cannot select more than 10 seats.");
             return;
         }
-
         setSelectedSeats((prev) =>
             isAlreadySelected ? prev.filter((s) => s !== seatKey) : [...prev, seatKey]
         );
     };
 
-const handleConfirmBooking = async () => {
-    if (!socket.current || selectedSeats.length === 0) return;
+    const handleConfirmBooking = async () => {
+        if (!socket.current || selectedSeats.length === 0) return;
+        try {
+            const response = await axios.post(
+                `http://localhost:3000/seat/api/bookseat/${showId}/${timeId}`,
+                { seatsId: selectedSeats }
+            );
+            const bookingData = response.data.booking;
+            const bookingId = bookingData._id;
 
-    try {
-        const response = await axios.post(
-            `http://localhost:3000/seat/api/bookseat/${showId}/${timeId}`,
-            { seatsId: selectedSeats },
-        );
+            setBookingId(bookingId); // ✅ state mein set karo
 
-        const bookingData = response.data.booking;
-        const bookingId = bookingData._id; 
+            selectedSeats.forEach((seatId) => {
+                socket.current.emit("lockSeat", { seatId, userId });
+            });
 
-        console.log("Booking ID:", bookingId);
+            const expiresAt = Date.now() + LOCK_DURATION * 1000;
+            const subtotal = selectedSeats.length * rate;
+            const bookingFee = Math.round(subtotal * 0.1);
+            const total = subtotal + bookingFee;
 
-        selectedSeats.forEach((seatId) => {
-            socket.current.emit("lockSeat", { seatId, userId });
-        });
+            localStorage.setItem(
+                "seatLock",
+                JSON.stringify({
+                    lockedSeats: selectedSeats,
+                    expiresAt,
+                    totalPrice: total,
+                    subtotal,
+                    bookingFee,
+                    bookingId, // ✅ localStorage mein bhi save
+                })
+            );
 
-        const expiresAt = Date.now() + LOCK_DURATION * 1000;
-        localStorage.setItem(
-            "seatLock",
-            JSON.stringify({
-                lockedSeats: selectedSeats,
-                expiresAt,
-                totalPrice,
-                bookingId, 
-            })
-        );
+            setLockedByMe(selectedSeats);
+            setTimeLeft(LOCK_DURATION);
+            setTotalprice(total);
+            setBookingConfirmed(true);
 
-        setLockedByMe(selectedSeats);
-        setTimeLeft(LOCK_DURATION);
-        setTotalprice(totalPrice);
-        setBookingConfirmed(true);
+            navigate(`/PayOut/${showId}/${timeId}/${bookingId}`);
+        } catch (err) {
+            console.error("Booking failed:", err);
+            alert(err?.response?.data?.message || "Booking failed. Please try again.");
+        }
+    };
 
-        navigate(`/PayOut/${showId}/${timeId}/${bookingId}`); // ✅ seedha variable use karo
-
-    } catch (err) {
-        console.error("Booking failed:", err);
-        alert(err?.response?.data?.message || "Booking failed. Please try again.");
-    }
-};
-
-  
-     
-
-    const handleCancelLock = () => {
+    const handleCancelLock = async () => {
         if (!socket.current) return;
 
-        lockedByMe.forEach((seatId) => {
-            socket.current.emit("unlockSeat", { seatId });
-        });
+        // ✅ localStorage se parse karke bookingId lo
+        const saved = localStorage.getItem("seatLock");
+        const bookingId = saved ? JSON.parse(saved).bookingId : null;
 
+        // Socket se seats unlock karo
+        lockedByMe.forEach((seatId) => socket.current.emit("unlockSeat", { seatId }));
+
+        // Backend se SeatBooking delete karo
+        if (bookingId) {
+            try {
+                await axios.delete(`http://localhost:3000/seat/api/deletebookseat/${bookingId}`);
+            } catch (err) {
+                console.error("Failed to delete booking:", err);
+            }
+        }
+
+        // State reset
         setLockedByMe([]);
         setSelectedSeats([]);
         setTimeLeft(null);
         setTotalprice(0);
         setBookingConfirmed(false);
+        setBookingId(''); // ✅ reset
         localStorage.removeItem("seatLock");
     };
-  
-    // Build rows
+
     const rows = [];
     for (let i = 0; i < seats.length; i += seatsPerRow) {
         rows.push(seats.slice(i, i + seatsPerRow));
     }
-
     const aisleAfter = Math.floor(seatsPerRow / 2) - 1;
 
     if (isLoading)
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
                 <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-                <p className="text-purple-500 tracking-widest text-sm uppercase">
-                    Loading seats…
-                </p>
+                <p className="text-purple-500 tracking-widest text-sm uppercase">Loading seats…</p>
             </div>
         );
 
@@ -296,16 +327,10 @@ const handleConfirmBooking = async () => {
                             <p className="text-purple-700 text-xs uppercase tracking-widest font-semibold mb-1">
                                 Seats reserved — complete payment
                             </p>
-                            <p className="text-gray-500 text-xs">
-                                Your seats are locked for other users
-                            </p>
+                            <p className="text-gray-500 text-xs">Your seats are locked for other users</p>
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                            <span
-                                className={`text-2xl font-bold tabular-nums ${
-                                    timeLeft <= 60 ? "text-red-500" : "text-purple-600"
-                                }`}
-                            >
+                            <span className={`text-2xl font-bold tabular-nums ${timeLeft <= 60 ? "text-red-500" : "text-purple-600"}`}>
                                 {formatTime(timeLeft)}
                             </span>
                             <button
@@ -321,15 +346,12 @@ const handleConfirmBooking = async () => {
                 {/* Screen */}
                 <div className="w-full max-w-3xl flex flex-col items-center mb-8 z-10 mt-4">
                     <div className="w-3/4 h-1.5 rounded-full bg-purple-400 shadow-[0_0_16px_rgba(168,85,247,0.4)]" />
-                    <p className="text-xs tracking-[0.4em] text-purple-400 uppercase mt-2 font-medium">
-                        Screen
-                    </p>
+                    <p className="text-xs tracking-[0.4em] text-purple-400 uppercase mt-2 font-medium">Screen</p>
                     <div
                         style={{
                             width: "75%",
                             height: "16px",
-                            background:
-                                "linear-gradient(to bottom, rgba(168,85,247,0.15), transparent)",
+                            background: "linear-gradient(to bottom, rgba(168,85,247,0.15), transparent)",
                             clipPath: "polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%)",
                         }}
                     />
@@ -345,12 +367,10 @@ const handleConfirmBooking = async () => {
                             <span className="text-purple-400 text-xs w-5 text-center font-mono font-semibold">
                                 {ROW_LABELS[rowIdx] ?? rowIdx + 1}
                             </span>
-
                             {row.map((seat, idx) => {
                                 const seatKey = seat._id;
-                                const label =
-                                    seat?.seatNo ?? seat?.number ?? seat?.label ?? `${idx + 1}`;
-                                const isBooked = seat?.locked ?? seat?.isBooked ?? false;
+                                const label = seat?.seatNo ?? seat?.number ?? seat?.label ?? `${idx + 1}`;
+                                const isBooked = seat?.isBooked || seat?.locked || false;
                                 const isSelected = selectedSeats.includes(seatKey);
                                 const isLockedByMe = lockedByMe.includes(seatKey);
 
@@ -358,17 +378,13 @@ const handleConfirmBooking = async () => {
                                     "relative flex-shrink-0 w-7 h-6 md:w-8 md:h-7 rounded-t-md text-[9px] font-semibold transition-all duration-150 border-b-2 cursor-pointer outline outline-1 ";
 
                                 if (isLockedByMe) {
-                                    seatClass +=
-                                        "bg-orange-400 border-b-orange-600 outline-orange-500 text-white cursor-not-allowed";
+                                    seatClass += "bg-orange-400 border-b-orange-600 outline-orange-500 text-white cursor-not-allowed";
                                 } else if (isBooked) {
-                                    seatClass +=
-                                        "bg-gray-100 border-b-gray-300 outline-gray-300 text-gray-300 cursor-not-allowed";
+                                    seatClass += "bg-gray-100 border-b-gray-300 outline-gray-300 text-gray-300 cursor-not-allowed";
                                 } else if (isSelected) {
-                                    seatClass +=
-                                        "bg-purple-500 border-b-purple-600 outline-purple-700 text-white scale-110";
+                                    seatClass += "bg-purple-500 border-b-purple-600 outline-purple-700 text-white scale-110";
                                 } else {
-                                    seatClass +=
-                                        "bg-white border-b-gray-500 outline-gray-300 text-gray-500 hover:bg-purple-50 hover:outline-purple-300 hover:border-b-purple-300 hover:text-purple-600 hover:scale-105";
+                                    seatClass += "bg-white border-b-gray-500 outline-gray-300 text-gray-500 hover:bg-purple-50 hover:outline-purple-300 hover:border-b-purple-300 hover:text-purple-600 hover:scale-105";
                                 }
 
                                 return (
@@ -380,6 +396,8 @@ const handleConfirmBooking = async () => {
                                             title={
                                                 isLockedByMe
                                                     ? "Locked by you"
+                                                    : isBooked
+                                                    ? "Already booked"
                                                     : `Row ${ROW_LABELS[rowIdx]} · Seat ${label}`
                                             }
                                         >
@@ -389,7 +407,6 @@ const handleConfirmBooking = async () => {
                                     </React.Fragment>
                                 );
                             })}
-
                             <span className="text-purple-400 text-xs w-5 text-center font-mono font-semibold">
                                 {ROW_LABELS[rowIdx] ?? rowIdx + 1}
                             </span>
@@ -417,54 +434,50 @@ const handleConfirmBooking = async () => {
                     </div>
                 </div>
 
-                {/* Confirm Booking bar — shown before locking */}
-                
+                {/* Bottom Bar - Before booking confirmed */}
+                {!bookingConfirmed && (
                     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
                         <div>
                             <p className="text-purple-500 text-xs uppercase tracking-widest font-medium">
-                                {selectedSeats.length} seat{selectedSeats.length > 1 ? "s" : ""}{" "}
-                                selected
+                                {selectedSeats.length} seat{selectedSeats.length > 1 ? "s" : ""} selected
                             </p>
-                            <p className="text-gray-900 text-2xl font-bold">
-                                ₹{totalPrice.toLocaleString()}
-                            </p>
+                            <p className="text-gray-900 text-2xl font-bold">₹{totalPrice.toLocaleString()}</p>
                         </div>
                         <button
                             onClick={handleConfirmBooking}
-                            className="bg-purple-500 hover:bg-purple-600 text-white font-bold px-8 py-3 rounded-xl tracking-wide uppercase text-sm border border-purple-600 shadow-md transition-all duration-150"
+                            disabled={selectedSeats.length === 0}
+                            className="bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-xl tracking-wide uppercase text-sm border border-purple-600 shadow-md transition-all duration-150"
                         >
                             Confirm Booking →
                         </button>
                     </div>
-                
+                )}
 
-       
-{bookingConfirmed && lockedByMe.length > 0 && (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
-        <div>
-            <p className="text-orange-500 text-xs uppercase tracking-widest font-medium">
-                {lockedByMe.length} seat{lockedByMe.length > 1 ? "s" : ""} locked · expires in {formatTime(timeLeft)}
-            </p>
-            <p className="text-gray-900 text-2xl font-bold">
-                ₹{totalprice.toLocaleString()}
-            </p>
-        </div>
-        <div className="flex gap-3">
-            <button
-                onClick={handleCancelLock}
-                className="text-sm text-gray-400 hover:text-red-500 underline transition-colors"
-            >
-                Cancel
-            </button>
-            <button
-                onClick={() => navigate("/paynow")}
-                className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-3 rounded-xl tracking-wide uppercase text-sm border border-green-600 shadow-md transition-all duration-150"
-            >
-                Pay Now →
-            </button>
-        </div>
-    </div>
-)}
+                {/* Bottom Bar - After booking confirmed */}
+                {bookingConfirmed && lockedByMe.length > 0 && (
+                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between shadow-lg">
+                        <div>
+                            <p className="text-orange-500 text-xs uppercase tracking-widest font-medium">
+                                {lockedByMe.length} seat{lockedByMe.length > 1 ? "s" : ""} locked · expires in {formatTime(timeLeft)}
+                            </p>
+                            <p className="text-gray-900 text-2xl font-bold">₹{totalprice.toLocaleString()}</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleCancelLock}
+                                className="text-sm text-gray-400 hover:text-red-500 underline transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => navigate(`/PayOut/${showId}/${timeId}/${bookinid}`)} // ✅ state se aa raha hai
+                                className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-3 rounded-xl tracking-wide uppercase text-sm border border-green-600 shadow-md transition-all duration-150"
+                            >
+                                Pay Now →
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
