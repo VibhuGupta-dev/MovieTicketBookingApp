@@ -13,11 +13,12 @@ import { Server } from "socket.io"
 import { socketHandler } from "./controller/TicketBookingController/Lockticket.js"
 import paymentrouter from "./routes/PaymentRoutes.js"
 import seatbookinrouter from "./routes/SeatBookRoutes.js"
+import dotenv from "dotenv";
 
 const PORT = 3000
 const app = express()
 export const server = createServer(app)
-
+dotenv.config();
 export const io = new Server(server, {
   cors: {
     origin: "*",
@@ -33,7 +34,8 @@ app.use(cookieParser())
 app.use(express.json())
 
 app.use(cors({
-  origin: "*"
+  origin: "http://localhost:5173",
+  credentials: true
 }))
 socketHandler(io)
 connectmongodb()
@@ -41,6 +43,7 @@ connectmongodb()
 app.get("/" , (req , res) => {
   res.send("hey there")
 })
+// add this temporarily in App.js
 
 app.use('/user' , userrouter)
 app.use('/cinemahall' , cinimaroute)
