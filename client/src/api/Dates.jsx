@@ -3,10 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export default function Dates() {
   const navigate = useNavigate();
-  const { id, date } = useParams(); // date from params
+  const { id, date } = useParams(); 
   const today = new Date();
 
-  // ✅ format local date (NO toISOString)
   const formatDateForURL = (d) => {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -14,14 +13,12 @@ export default function Dates() {
     return `${year}-${month}-${day}`;
   };
 
-  // next 5 days
   const next5Days = Array.from({ length: 5 }, (_, i) => {
     const d = new Date();
     d.setDate(today.getDate() + i);
     return d;
   });
 
-  // ✅ selected date from params OR today
   const [selectedDate, setSelectedDate] = useState(() => {
     if (date) return new Date(date);
     return today;

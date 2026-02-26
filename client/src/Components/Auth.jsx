@@ -1,10 +1,11 @@
+// Auth.jsx
 import { useState } from "react";
 import axios from "axios";
 
 const API = "http://localhost:3000/user";
 
 export default function AuthBox({ onClose }) {
-  
+
   const [screen, setScreen] = useState("signin");
 
   const [signInForm, setSignInForm] = useState({ email: "", password: "" });
@@ -20,15 +21,20 @@ export default function AuthBox({ onClose }) {
 
   const clearMessages = () => { setError(""); setSuccess(""); };
 
- 
+  // ── Sign In ──
   async function handleSignIn(e) {
     e.preventDefault();
     clearMessages();
     setLoading(true);
     try {
-      await axios.post(`${API}/api/login`, signInForm, { withCredentials: true });
+      const res = await axios.post(`${API}/api/login`, signInForm, { withCredentials: true });
+console.log("LOGIN RESPONSE:", res.data);
+      // ✅ Save token so navbar persists login across refreshes
+      const token = res.data.token || res.data.accessToken || res.data.jwt;
+      if (token) localStorage.setItem("token", token);
+
       setSuccess("Logged in successfully!");
-      setTimeout(() => onClose?.(), 1000);
+      setTimeout(() => onClose?.(res.data.user || true), 1000);
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed");
     } finally {
@@ -52,17 +58,20 @@ export default function AuthBox({ onClose }) {
     }
   }
 
-
+  // ── Verify Signup OTP ──
   async function handleVerifySignupOtp(e) {
     e.preventDefault();
     clearMessages();
     setLoading(true);
     try {
-        console.log(otp)
-      await axios.post(`${API}/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
-      
+      const res = await axios.post(`${API}/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
+
+      // ✅ Save token so navbar persists login across refreshes
+      const token = res.data.token || res.data.accessToken || res.data.jwt;
+      if (token) localStorage.setItem("token", token);
+
       setSuccess("Account created! You're now logged in.");
-      setTimeout(() => onClose?.(), 1200);
+      setTimeout(() => onClose?.(res.data.user || true), 1200);
     } catch (err) {
       setError(err?.response?.data?.message || "OTP verification failed");
     } finally {
@@ -70,6 +79,7 @@ export default function AuthBox({ onClose }) {
     }
   }
 
+  // ── Forgot Password ──
   async function handleForgotPass(e) {
     e.preventDefault();
     clearMessages();
@@ -85,6 +95,7 @@ export default function AuthBox({ onClose }) {
     }
   }
 
+  // ── Verify Forgot OTP ──
   async function handleVerifyForgotOtp(e) {
     e.preventDefault();
     clearMessages();

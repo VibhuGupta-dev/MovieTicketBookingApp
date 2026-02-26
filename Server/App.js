@@ -43,7 +43,7 @@ connectmongodb()
 app.get("/" , (req , res) => {
   res.send("hey there")
 })
-// add this temporarily in App.js
+
 
 app.use('/user' , userrouter)
 app.use('/cinemahall' , cinimaroute)

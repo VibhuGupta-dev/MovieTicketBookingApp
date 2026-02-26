@@ -31,7 +31,7 @@ export async function getShow(req, res) {
     const shows = await Show.find(query).populate("cinemaId");
     console.log("Shows found:", shows.length);
 
-    return res.status(200).json(shows); // ✅ always 200, empty array if none found
+    return res.status(200).json(shows); 
 
   } catch (err) {
     console.error(err);

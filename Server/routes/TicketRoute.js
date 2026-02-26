@@ -6,5 +6,5 @@ import { getticket } from "../controller/TicketBookingController/GetTicket.js"
 const router = express.Router()
 
 router.post('/api/bookticket/:movieId/:cinemahallId/:showId' , isuserloggedin , calculateTotal)
-router.get('/api/getticket', getticket) 
+router.get('/api/getticket',isuserloggedin , getticket) 
 export default router

@@ -2,14 +2,13 @@
 
 import SeatBooking from "../../models/SeatBookSchema.js";
 
-// ✅ Random booking reference generator
 const generateBookingRef = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let ref = "BK-";
   for (let i = 0; i < 8; i++) {
     ref += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return ref; // e.g. BK-A3X9KP2M
+  return ref; 
 };
 
 export const createSeatBooking = async (req, res) => {
@@ -42,7 +41,6 @@ export const createSeatBooking = async (req, res) => {
     const now = new Date();
     const LOCK_DURATION_MS = 10 * 60 * 1000;
 
-    // ✅ Generate unique ref — retry if duplicate exists
     let bookingRef;
     let isUnique = false;
     while (!isUnique) {
@@ -55,7 +53,7 @@ export const createSeatBooking = async (req, res) => {
       ShowId,
       TimeSlotId,
       seatsId,
-      BookingRefrence: bookingRef, // ✅ save generated ref
+      BookingRefrence: bookingRef, 
       isBooked: false,
       isLocked: true,
       lockedAt: now,

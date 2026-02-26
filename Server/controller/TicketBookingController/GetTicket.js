@@ -2,11 +2,11 @@ import ticket from "../../models/MovieTicketBookingSchema.js";
 
 export async function getticket(req, res) {
   try {
-    const { ticketId } = req.query; // ✅ use query params for GET
+    const { ticketId } = req.query; 
     if (!ticketId) {
       return res.status(400).json({ message: "ticket id not there" });
     }
-    const foundTicket = await ticket.findById(ticketId); // ✅ findById, not find
+    const foundTicket = await ticket.findById(ticketId); 
     if (!foundTicket) {
       return res.status(404).json({ message: "ticket not found" });
     }

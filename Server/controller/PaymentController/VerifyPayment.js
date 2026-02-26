@@ -87,7 +87,7 @@ export async function verifyPayment(req, res) {
 await Show.findByIdAndUpdate(
   order.showId,
   {
-    $addToSet: {  // ✅ duplicates automatically ignore hote hain
+    $addToSet: {  
       "timeSlots.$[slot].bookedSeatIds": { $each: order.seatIds },
     },
   },
@@ -98,7 +98,7 @@ await Show.findByIdAndUpdate(
 );
     }
 
-    // ── Step 9: Update SeatBooking ──
+ 
     if (seatBooking) {
       seatBooking.isBooked = true;
       seatBooking.isLocked = false;
@@ -107,7 +107,7 @@ await Show.findByIdAndUpdate(
       await seatBooking.save();
     }
 
-    // ── Step 10: Emit socket + update user ──
+  
     io.emit("seatBooked", order.seatIds);
 
     await User.findByIdAndUpdate(userId, {

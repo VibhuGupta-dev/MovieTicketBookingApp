@@ -26,7 +26,6 @@ export const getCitiesByState = async (countryCode, stateCode) => {
       const errorText = await response.text();
       console.error('❌ API Error:', response.status, errorText);
       
-      // If 401, the API key might be invalid or expired
       if (response.status === 401) {
         console.error('API key is invalid or expired. Please check your API key at https://countrystatecity.in/');
       }
@@ -65,7 +64,6 @@ export const getStatesByCountry = async (countryCode) => {
   }
 };
 
-// Test function to verify API key
 export const testApiKey = async () => {
   try {
     const response = await fetch(`${BASE_URL}/countries`, {
