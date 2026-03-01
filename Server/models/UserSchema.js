@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
     email: {
@@ -13,43 +13,35 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      trim: true
+      trim: true,
     },
 
     role: {
       type: String,
       enum: ["user", "owner", "Admin"],
-      default: "user"
+      default: "user",
     },
 
     phoneNumber: {
       type: String,
-      required: true
+      required: true,
     },
 
     password: {
       type: String,
       required: true,
-      
     },
     orderHistory: [
-   {
-    orderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Order"
-    },
-    totalAmount: Number,
-    status: String,
-    
-     orderedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }
-]
-
+      {
+        orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
+        ticketId: { type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }, // ✅ yeh add karo
+        totalAmount: Number,
+        status: String,
+        orderedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = mongoose.model("User", userSchema);

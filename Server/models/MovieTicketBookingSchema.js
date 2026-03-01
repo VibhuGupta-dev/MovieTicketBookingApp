@@ -30,7 +30,7 @@ const movieticketSchema = mongoose.Schema({
     ref: "TimeSlot",
     required: true,
   },
-
+  qrCode: { type: String }, 
   isQRgenerated: {
     type: Boolean,
     default: false,

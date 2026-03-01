@@ -110,9 +110,16 @@ await Show.findByIdAndUpdate(
   
     io.emit("seatBooked", order.seatIds);
 
-    await User.findByIdAndUpdate(userId, {
-      $push: { orderHistory: { orderId: order._id, totalAmount: order.amount, status: "paid" } },
-    });
+await User.findByIdAndUpdate(userId, {
+  $push: {
+    orderHistory: {
+      orderId: order._id,
+      totalAmount: order.amount,
+      status: "paid",
+      ticketId: ticket._id,  
+    },
+  },
+});
 
     return res.status(200).json({
       success: true,
