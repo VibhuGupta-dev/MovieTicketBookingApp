@@ -28,16 +28,28 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ── Auth State ────────────────────────────────────────────────────────────
+  // ── Auth State ──
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("token"));
+  const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const dropdownRef = useRef(null);
-  const profileMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Fetch user info when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      axios
+        .get("http://localhost:3000/user/api/me", { withCredentials: true })
+        .then((res) => setUser(res.data.user))
+        .catch(() => setUser(null));
+    } else {
+      setUser(null);
+    }
+  }, [isLoggedIn]);
 
   // Sync login state across tabs
   useEffect(() => {
@@ -46,36 +58,22 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     return () => window.removeEventListener("storage", syncAuth);
   }, []);
 
-  // Close profile menu on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
-        setProfileMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // ── Profile Button Click Handler ──────────────────────────────────────────
+  // ── Profile Button Click ──
   const handleProfileClick = () => {
     if (isLoggedIn) {
-      // User logged in → toggle dropdown with Profile + Logout
       setProfileMenuOpen((prev) => !prev);
     } else {
-      // User not logged in → open AuthBox
       setShowAuth(true);
     }
   };
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+  // ── Logout ──
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
       await axios.post(`${API}/api/logout`, {}, { withCredentials: true });
     } catch (err) {
-      console.log(err)
-      // Even if API fails, clear locally
+      console.log(err);
     } finally {
       localStorage.removeItem("token");
       setIsLoggedIn(false);
@@ -85,13 +83,13 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     }
   };
 
-  // ── Auth Close Callback ───────────────────────────────────────────────────
+  // ── Auth Close ──
   const handleAuthClose = (loggedInUser) => {
     setShowAuth(false);
     if (loggedInUser) setIsLoggedIn(true);
   };
 
-  // ── Navigation ────────────────────────────────────────────────────────────
+  // ── Active Nav ──
   const getActiveBar = () => {
     const path = location.pathname;
     if (path.includes("/cinema")) return "Cinemas";
@@ -107,7 +105,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     else navigate("/");
   };
 
-  // ── Location API ──────────────────────────────────────────────────────────
+  // ── Location API ──
   useEffect(() => {
     const initializeLocation = async () => {
       setLoading(true);
@@ -171,6 +169,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     fetchCities();
   }, [selectedState?.iso2]);
 
+  // Close location dropdown on outside click (desktop only)
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -186,7 +185,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
 
   const handleStateSelect = (state) => {
     setSelectedState(state);
-    setSelectedStateId(state.id);
+    if (setSelectedStateId) setSelectedStateId(state.id);
     localStorage.setItem("selectedState", JSON.stringify(state));
     setActiveTab("cities");
     setSearchTerm("");
@@ -194,7 +193,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
 
   const handleCitySelect = (city) => {
     setSelectedCity(city.name);
-    setSelectedCityId(city.id);
+    if (setSelectedCityId) setSelectedCityId(city.id);
     localStorage.setItem("selectedCity", city.name);
     setIsDropdownOpen(false);
     setSearchTerm("");
@@ -222,74 +221,28 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
   const filteredCities = cities.filter((c) => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const filteredStates = states.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // ── Profile Button + Conditional Dropdown ────────────────────────────────
+  // ── Profile Button (no dropdown inside) ──
   const ProfileButton = ({ iconSize = "h-6 w-6", btnSize = "h-10 w-10" }) => (
-    <div className="relative" ref={profileMenuRef}>
-      <button
-        onClick={handleProfileClick}
-        title={isLoggedIn ? "Account" : "Sign In"}
-        className={`flex items-center justify-center ${btnSize} rounded-full transition-all duration-200 ${
-          isLoggedIn
-            ? "bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/30 ring-2 ring-purple-400/20"
-            : "hover:bg-gray-100 active:bg-gray-200"
-        }`}
+    <button
+      onClick={handleProfileClick}
+      title={isLoggedIn ? "Account" : "Sign In"}
+      className={`flex items-center justify-center ${btnSize} rounded-full transition-all duration-200 ${
+        isLoggedIn
+          ? "bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/30 ring-2 ring-purple-400/20"
+          : "hover:bg-gray-100 active:bg-gray-200"
+      }`}
+    >
+      <svg
+        className={`${iconSize} ${isLoggedIn ? "text-white" : "text-gray-700"}`}
+        fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
-        <svg
-          className={`${iconSize} ${isLoggedIn ? "text-white" : "text-gray-700"}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      </button>
-
-      {/* ── Dropdown: only when logged in ── */}
-      {isLoggedIn && profileMenuOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-          
-          {/* Profile option */}
-          <button
-            onClick={() => { navigate("/profile"); setProfileMenuOpen(false); }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
-          >
-            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            My Profile
-          </button>
-
-          <div className="h-px bg-gray-100 mx-2" />
-
-          {/* Logout option */}
-          <button
-            onClick={handleLogout}
-            disabled={logoutLoading}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-          >
-            {logoutLoading ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-r-transparent" />
-                Signing out…
-              </>
-            ) : (
-              <>
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-                </svg>
-                Logout
-              </>
-            )}
-          </button>
-        </div>
-      )}
-    </div>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    </button>
   );
 
-  // ── Location Dropdown Content ─────────────────────────────────────────────
+  // ── Location Dropdown Content ──
   const DropdownContent = () => (
     <>
       <div className="flex border-b border-gray-200">
@@ -366,7 +319,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     </>
   );
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ──
   return (
     <>
       <header className="navbar bg-white border-b border-gray-100">
@@ -469,6 +422,61 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
             <ProfileButton iconSize="h-6 w-6" btnSize="h-10 w-10" />
           </div>
         </div>
+
+        {/* ── Global Profile Dropdown — renders once, works on mobile + desktop ── */}
+        {isLoggedIn && profileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setProfileMenuOpen(false)}
+            />
+            {/* Menu */}
+            <div className="fixed right-4 top-20 z-50 w-52 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden">
+              {/* User info header */}
+              <div className="px-4 py-3 bg-purple-50 border-b border-purple-100">
+                <p className="text-sm font-semibold text-purple-700 truncate">{user?.name || "Account"}</p>
+                <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
+              </div>
+
+              {/* My Profile */}
+              <button
+                onClick={() => { navigate("/profile"); setProfileMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+              >
+                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                My Profile
+              </button>
+
+              <div className="h-px bg-gray-100 mx-3" />
+
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                disabled={logoutLoading}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                {logoutLoading ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-r-transparent" />
+                    Signing out…
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                    </svg>
+                    Logout
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </header>
 
       {/* Mobile location overlay */}
@@ -481,7 +489,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
         </div>
       )}
 
-      {/* AuthBox — only shown when NOT logged in */}
+      {/* AuthBox */}
       {showAuth && !isLoggedIn && (
         <AuthBox onClose={handleAuthClose} />
       )}

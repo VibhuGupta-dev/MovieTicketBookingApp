@@ -8,7 +8,7 @@ export async function ReadcinemaWithLocation(req, res) {
       return res.status(400).json({ message: "both state and city needed" });
     }
 
-    const cinema = await Cinema.find({ StateId, CityId });
+    const cinema = await Cinema.find({ StateId, CityId }).populate("MovieId");
 
     if (cinema.length === 0) {
       return res.status(404).json({ message: "no cinema found" });

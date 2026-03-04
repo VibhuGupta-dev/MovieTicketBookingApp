@@ -1,5 +1,5 @@
 import ticket from "../../models/MovieTicketBookingSchema.js";
-
+import Cinema from "../../models/CinemaHallSchema.js";
 export async function getticket(req, res) {
   try {
     const { ticketId } = req.query;
@@ -31,17 +31,37 @@ export async function getticket(req, res) {
   }
 }
 
+
 export async function getticketid(req, res) {
   try {
-    console.log("hey")
-    const yticket = await ticket.findById(req.params.ticketId)
+    const yticket = await ticket
+      .findById(req.params.ticketId)
+      .populate("ShowId")
+      .populate("UserId", "name email")
     
-   console.log(yticket)
-    if (!yticket) return res.status(404).json({ message: "Ticket not found" })
-  
 
-    res.json({ yticket })  // ✅ bas yahi enough hai
+    if (!yticket) return res.status(404).json({ message: "Ticket not found" })
+
+    const cinema = await Cinema.findOne({
+      "seats._id": { $in: yticket.SeatIds }
+    })
+
+    const bookedSeats = cinema
+      ? cinema.seats
+          .filter(seat =>
+            yticket.SeatIds.map(id => id.toString()).includes(seat._id.toString())
+          )
+          .map(seat => ({ seatno: seat.seatno, rate: seat.rate }))
+      : []
+
+    res.json({
+      yticket,
+      bookedSeats,
+      cinemaName: cinema?.cinemaHallName ?? null
+    })
+
   } catch (err) {
+    console.error(err)
     res.status(500).json({ message: "Failed", error: err.message })
   }
 }

@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
-
+import { Footer } from "../Components/Footer";
+import { useNavigate } from "react-router-dom";
 export function AllCinemaPage() {
   console.log("🎥 AllCinemaPage: Component rendering");
-
+   const navigate = useNavigate();
+ 
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(null);
   const [cinemas, setCinemas] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
+ 
 
   useEffect(() => {
     if (!selectedStateId || !selectedCityId) {
@@ -43,6 +45,7 @@ export function AllCinemaPage() {
         console.log("   → Total cinemas:", response.data?.length || 0);
 
         setCinemas(response.data || []);
+       
       } catch (err) {
         console.error("❌ AllCinemaPage: Failed to fetch cinemas:", err);
         console.error("   → Error message:", err.message);
@@ -58,8 +61,12 @@ export function AllCinemaPage() {
   }, [selectedStateId, selectedCityId]);
 
   console.log("🎨 AllCinemaPage: Rendering with", cinemas.length, "cinemas");
-
+const handleview = (e) => {
+ console.log(e)
+ navigate(`/${e.cinema._id}`)
+}
   return (
+     <>
     <div className="min-h-screen bg-gray-50">
       <Navbar
         setSelectedStateId={setSelectedStateId}
@@ -136,16 +143,25 @@ export function AllCinemaPage() {
                       📍 {cinema.address}
                     </p>
                   )}
-
-                  <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
-                    View Shows
+                  {cinema._id && (
+                      <button onClick={(e) => {handleview({cinema})}} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
+                    See Shows
                   </button>
+                  )}
+                  
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+        
     </div>
+    <Footer />
+   
+    
+    
+    </>
+  
   );
 }

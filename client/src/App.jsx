@@ -7,7 +7,7 @@ import { MovieHall } from "./Page/MovieHall";
 import { BillPage } from "./Page/BillPage";
 import PaymentPage from "./Page/PaymentPage";
 import { Profile } from "./Page/Profile";
-
+import { Allshows } from "./Page/Allshows";
 export default function App() {
   return (
     <div className="w-full min-h-screen bg-gray-600">
@@ -20,6 +20,7 @@ export default function App() {
         <Route path="/PayOut/:showId/:timeId/:bookingId" element={<BillPage />} />
         <Route path="/payment/:bookingId" element={<PaymentPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/:cinemahallID" element={ <Allshows />} />
       </Routes>
     </div>
   );

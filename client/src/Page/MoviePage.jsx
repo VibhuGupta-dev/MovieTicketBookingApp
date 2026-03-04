@@ -2,7 +2,7 @@ import Navbar from "../Components/Navbar";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import AllMovies from "../Components/AllMovies";
-
+import { Footer } from "../Components/Footer";
 export function MoviePage() {
   // ===== DEBUG CONSOLE 1: Component Mount =====
   console.log("🎬 MoviePage: Component rendering/re-rendering");
@@ -172,7 +172,9 @@ export function MoviePage() {
       />
 
       {/* Hero Slider Section */}
-      <div
+      <div className="p-10 bg-white">
+
+<div
         ref={sliderRef}
         className="relative w-full h-[600px] md:h-[600px] lg:h-[700px] overflow-hidden bg-black"
         onTouchStart={handleTouchStart}
@@ -463,6 +465,8 @@ export function MoviePage() {
           </svg>
         </div>
       </div>
+      </div>
+      
 
       {/* All Movies Section */}
       <div className="bg-white">
@@ -474,6 +478,7 @@ export function MoviePage() {
           <AllMovies movies={movies} />
         </div>
       </div>
+      <Footer />
     </>
   );
 }

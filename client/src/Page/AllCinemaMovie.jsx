@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Calendar from "../api/Dates";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
+import { Footer } from "../Components/Footer";
 export function AllcinemaMoviebased() {
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(null);
@@ -182,6 +182,7 @@ export function AllcinemaMoviebased() {
 
         </div>
       </div>
+      <Footer />
     </>
   );
 }
