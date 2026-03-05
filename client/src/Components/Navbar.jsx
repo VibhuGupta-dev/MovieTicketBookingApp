@@ -1,4 +1,3 @@
-// Navbar.jsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -242,7 +241,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     </button>
   );
 
-  // ── Location Dropdown Content ──
+
   const DropdownContent = () => (
     <>
       <div className="flex border-b border-gray-200">

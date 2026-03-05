@@ -25,7 +25,7 @@ export async function loginUser(req, res) {
 
     // ✅ token ab bahar declare hai — response mein accessible hoga
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email , role: user.role},
       jwtSecret,
       { expiresIn: "7d" }
     );
@@ -37,7 +37,8 @@ export async function loginUser(req, res) {
 
     return res.status(200).json({
       message: `login sucessfull email : ${email}`,
-      token: token, // ✅ ab yeh sahi value bhejega
+      token: token, 
+      role : user.role
     });
 
   } catch (err) {

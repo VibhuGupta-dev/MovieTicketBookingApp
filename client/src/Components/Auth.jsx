@@ -1,7 +1,7 @@
 // Auth.jsx
 import { useState } from "react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const API = "http://localhost:3000/user";
 
 export default function AuthBox({ onClose }) {
@@ -18,7 +18,7 @@ export default function AuthBox({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+  const navigate = useNavigate()
   const clearMessages = () => { setError(""); setSuccess(""); };
 
   // ── Sign In ──
@@ -28,11 +28,14 @@ export default function AuthBox({ onClose }) {
     setLoading(true);
     try {
       const res = await axios.post(`${API}/api/login`, signInForm, { withCredentials: true });
-console.log("LOGIN RESPONSE:", res.data);
+      console.log("LOGIN RESPONSE:", res.data);
       // ✅ Save token so navbar persists login across refreshes
       const token = res.data.token || res.data.accessToken || res.data.jwt;
       if (token) localStorage.setItem("token", token);
-
+      const data = res.data.role
+      if(data == "owner"){
+         navigate("/ownerpage")
+      }
       setSuccess("Logged in successfully!");
       setTimeout(() => onClose?.(res.data.user || true), 1000);
     } catch (err) {

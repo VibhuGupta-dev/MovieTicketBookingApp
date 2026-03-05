@@ -8,6 +8,8 @@ import { BillPage } from "./Page/BillPage";
 import PaymentPage from "./Page/PaymentPage";
 import { Profile } from "./Page/Profile";
 import { Allshows } from "./Page/Allshows";
+import { OwnerPage } from "./Page/OwnerPage";
+import ProtectedRoute from "./Components/ProtectedRoute";
 export default function App() {
   return (
     <div className="w-full min-h-screen bg-gray-600">
@@ -21,7 +23,16 @@ export default function App() {
         <Route path="/payment/:bookingId" element={<PaymentPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/:cinemahallID" element={ <Allshows />} />
+        <Route
+          path="/ownerpage"
+          element={
+            <ProtectedRoute allowedRole="owner">
+              <OwnerPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+    
     </div>
   );
 }

@@ -3,11 +3,10 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import AllMovies from "../Components/AllMovies";
 import { Footer } from "../Components/Footer";
-export function MoviePage() {
-  // ===== DEBUG CONSOLE 1: Component Mount =====
-  console.log("🎬 MoviePage: Component rendering/re-rendering");
+import { useNavigate } from "react-router-dom";
 
-  // ===== ADDED: State for location IDs (MAIN FIX) =====
+export function MoviePage() {
+  const navigate = useNavigate()
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(null);
 
@@ -27,7 +26,7 @@ export function MoviePage() {
   const [touchEnd, setTouchEnd] = useState(0);
   const sliderRef = useRef(null);
 
-  // ===== ADDED: Track when location changes =====
+
   useEffect(() => {
     if (selectedStateId && selectedCityId) {
       console.log("✅ MoviePage: Location changed!");
@@ -65,6 +64,10 @@ export function MoviePage() {
       prevSlide();
     }
   };
+
+const handlebooknow = (e) => {
+  navigate(`/Movie/${e}`)
+}
 
   useEffect(() => {
     if (movies.length === 0 || !isAutoPlaying) return;
@@ -300,7 +303,9 @@ export function MoviePage() {
                     )}
 
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start">
-                      <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 md:py-4 md:px-8 rounded-lg md:rounded-xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 md:gap-3 group w-full sm:w-auto">
+                      
+{movie._id && (
+<button onClick={(e) => {handlebooknow(movie._id)}} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 md:py-4 md:px-8 rounded-lg md:rounded-xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 md:gap-3 group w-full sm:w-auto">
                         <svg
                           className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform"
                           fill="currentColor"
@@ -311,6 +316,7 @@ export function MoviePage() {
                         <span className="text-base md:text-lg">Book Now</span>
                       </button>
 
+)}
                       {movie.MovieTrailer && (
                         <a
                           href={movie.MovieTrailer}
@@ -331,22 +337,8 @@ export function MoviePage() {
                         </a>
                       )}
 
-                      <button className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-lg md:rounded-xl border-2 border-white/30 hover:border-white/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 md:gap-3 w-full sm:w-auto">
-                        <svg
-                          className="w-5 h-5 md:w-6 md:h-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <span className="text-base md:text-lg">More Info</span>
-                      </button>
+
+                      
                     </div>
                   </div>
                 </div>

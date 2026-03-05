@@ -32,10 +32,7 @@ const showSchema = new mongoose.Schema({
     }
   ],
 
-  pricePerSeat: {
-    type: Number,
-    required: true,
-  },
+
 });
 
 

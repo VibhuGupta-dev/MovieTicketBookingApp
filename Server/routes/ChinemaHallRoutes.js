@@ -7,6 +7,7 @@ import { getcinemahall } from "../controller/ChinemaHallController/ReadChinemaHa
 import { updateStore } from "../controller/ChinemaHallController/UpdateCinemaHall.js";
 import { ReadcinemaWithLocation } from "../controller/ChinemaHallController/ReadCinema_location.js";
 import { ReadcinemaWithLocationAndMovieId } from "../controller/ChinemaHallController/ReadCinema_movie_location.js";
+import Cinema from "../models/CinemaHallSchema.js";
 const router = express.Router()
 
 router.post('/api/addchinemahall' , isownerloggedin , addChinemaHall)
@@ -16,4 +17,8 @@ router.put('/api/updatecinemahall/:chinemahallID', isownerloggedin , updateStore
 router.get('/api/getcinemalocation' , ReadcinemaWithLocation)
 router.get('/api/getcinemalocationMovieId/:MovieId' , ReadcinemaWithLocationAndMovieId)
 
+router.get('/api/mycinemas', isownerloggedin, async (req, res) => {
+  const cinemas = await Cinema.find({ userId: req.userId });
+  res.json({ cinemas });
+});
 export default router

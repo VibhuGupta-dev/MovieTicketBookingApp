@@ -12,19 +12,23 @@ export async function addshow(req , res) {
         return res.status(400).json({message : "cinema id not found"})
      }
      
-     const {showDate , timeSlot , pricePerSeat} = req.body
-      if(!showDate || !timeSlot || !pricePerSeat) {
-        return res.status(400).json({message  : "any of the field is empty"})
-      }
+    // AddShow.js — replace the destructuring and validation
+const { showDate, timeSlots } = req.body;
 
-     const slot = await Show.create({
-        UserId : userId,
-        movieId:movieId,
-        cinemaId : cinemaId,
-        showDate ,
-        timeSlot ,
-        pricePerSeat
-     })
+if (!showDate) {
+  return res.status(400).json({ message: "showDate is empty" });
+}
+if (!timeSlots || !Array.isArray(timeSlots) || timeSlots.length === 0) {
+  return res.status(400).json({ message: "timeSlots is empty" });
+}
+
+const slot = await Show.create({
+  UserId: userId,
+  movieId,
+  cinemaId,
+  showDate,
+  timeSlots,   // ✅ array of { time: "10:00 AM" }
+});
      if(!slot) { 
         return res.status(400).json({message : "slot not created"})
      }
