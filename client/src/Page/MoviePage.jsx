@@ -4,18 +4,12 @@ import axios from "axios";
 import AllMovies from "../Components/AllMovies";
 import { Footer } from "../Components/Footer";
 import { useNavigate } from "react-router-dom";
+import { FAQ } from "../Components/Faq";
 
 export function MoviePage() {
   const navigate = useNavigate()
   const [selectedStateId, setSelectedStateId] = useState(null);
-  const [selectedCityId, setSelectedCityId] = useState(null);
-
-  // ===== DEBUG CONSOLE 2: Check state functions =====
-  console.log("🔍 MoviePage: setSelectedStateId type =", typeof setSelectedStateId);
-  console.log("🔍 MoviePage: setSelectedCityId type =", typeof setSelectedCityId);
-  console.log("📍 MoviePage: Current selectedStateId =", selectedStateId);
-  console.log("📍 MoviePage: Current selectedCityId =", selectedCityId);
-
+  const [selectedCityId, setSelectedCityId] = useState(null)
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,10 +23,7 @@ export function MoviePage() {
 
   useEffect(() => {
     if (selectedStateId && selectedCityId) {
-      console.log("✅ MoviePage: Location changed!");
-      console.log("   → State ID:", selectedStateId);
-      console.log("   → City ID:", selectedCityId);
-      // Yahan tum future mein API call kar sakte ho location ke basis pe movies filter karne ke liye
+      console.log("MoviePage: Location changed!");
     }
   }, [selectedStateId, selectedCityId]);
 
@@ -81,8 +72,8 @@ const handlebooknow = (e) => {
 
   useEffect(() => {
     const fetchMovies = async () => {
-      // ===== DEBUG CONSOLE 3: API Call =====
-      console.log("🌐 MoviePage: Fetching movies from API...");
+    
+      console.log("MoviePage: Fetching movies from API...");
       
       try {
         const response = await axios.get(
@@ -90,8 +81,8 @@ const handlebooknow = (e) => {
         );
         
         // ===== DEBUG CONSOLE 4: API Response =====
-        console.log("✅ MoviePage: Movies fetched successfully!");
-        console.log("   → Total movies:", response.data.length);
+        console.log("MoviePage: Movies fetched successfully!");
+        console.log("Total movies:", response.data.length);
         
         setMovies(response.data || []);
         setTotalMovies(response.data.length);
@@ -113,7 +104,6 @@ const handlebooknow = (e) => {
     
     return (
       <>
-        {/* ===== FIX: Added props to Navbar ===== */}
         <Navbar 
           setSelectedStateId={setSelectedStateId}
           setSelectedCityId={setSelectedCityId}
@@ -131,12 +121,10 @@ const handlebooknow = (e) => {
   }
 
   if (error) {
-    // ===== DEBUG CONSOLE 7: Error State =====
     console.log("⚠️ MoviePage: Showing error state");
     
     return (
       <>
-        {/* ===== FIX: Added props to Navbar ===== */}
         <Navbar 
           setSelectedStateId={setSelectedStateId}
           setSelectedCityId={setSelectedCityId}
@@ -163,18 +151,15 @@ const handlebooknow = (e) => {
     );
   }
 
-  // ===== DEBUG CONSOLE 8: Main Render =====
   console.log("🎨 MoviePage: Rendering main content with", movies.length, "movies");
 
   return (
     <>
-      {/* ===== MAIN FIX: Line 78 - Added props to Navbar ===== */}
       <Navbar 
         setSelectedStateId={setSelectedStateId}
         setSelectedCityId={setSelectedCityId}
       />
 
-      {/* Hero Slider Section */}
       <div className="p-10 bg-white">
 
 <div
@@ -184,7 +169,6 @@ const handlebooknow = (e) => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Left Button */}
         <button
           onClick={prevSlide}
           onMouseEnter={() => setIsAutoPlaying(false)}
@@ -206,7 +190,6 @@ const handlebooknow = (e) => {
           </svg>
         </button>
 
-        {/* Slider Container */}
         <div
           className="flex transition-transform duration-1000 ease-out h-full"
           style={{ transform: `translateX(-${current * 100}%)` }}
@@ -347,7 +330,6 @@ const handlebooknow = (e) => {
           ))}
         </div>
 
-        {/* Right Button */}
         <button
           onClick={nextSlide}
           onMouseEnter={() => setIsAutoPlaying(false)}
@@ -369,7 +351,6 @@ const handlebooknow = (e) => {
           </svg>
         </button>
 
-        {/* Slide Indicators */}
         <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2 md:gap-3">
           {movies.map((_, index) => (
             <button
@@ -392,7 +373,6 @@ const handlebooknow = (e) => {
           {current + 1} / {totalMovies}
         </div>
 
-        {/* Auto-play Toggle */}
         <button
           onClick={() => setIsAutoPlaying(!isAutoPlaying)}
           className="absolute top-4 md:top-8 left-4 md:left-8 z-20 bg-black/50 backdrop-blur-md hover:bg-black/70 text-white p-2 md:p-3 rounded-full transition-all"
@@ -426,7 +406,6 @@ const handlebooknow = (e) => {
           )}
         </button>
 
-        {/* Mobile Swipe Hint */}
         <div className="md:hidden absolute bottom-20 left-1/2 -translate-x-1/2 z-20 bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-2 animate-pulse">
           <svg
             className="w-4 h-4"
@@ -460,7 +439,6 @@ const handlebooknow = (e) => {
       </div>
       
 
-      {/* All Movies Section */}
       <div className="bg-white">
         <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
           <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-gray-900">
@@ -470,6 +448,7 @@ const handlebooknow = (e) => {
           <AllMovies movies={movies} />
         </div>
       </div>
+      <FAQ  />
       <Footer />
     </>
   );

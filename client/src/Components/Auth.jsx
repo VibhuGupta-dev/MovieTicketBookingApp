@@ -36,6 +36,9 @@ export default function AuthBox({ onClose }) {
       if(data == "owner"){
          navigate("/ownerpage")
       }
+      if(data == "Admin") {
+        navigate('/AdminPage')
+      }
       setSuccess("Logged in successfully!");
       setTimeout(() => onClose?.(res.data.user || true), 1000);
     } catch (err) {

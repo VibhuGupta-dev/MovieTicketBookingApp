@@ -36,7 +36,7 @@ export function AllcinemaMoviebased() {
         );
         
         const data  = response.data || [];
-        console.log(data)
+        console.log(data , response)
         const uniqueShows = Array.from(
           new Map(data.map((item) => [item.cinemaId?._id, item])).values()
         );
@@ -48,7 +48,7 @@ export function AllcinemaMoviebased() {
                
 
       } catch (err) {
-        setError(err.message || "Failed to load shows");
+        setError("Shows not found in this city" , err);
       } finally {
         setIsLoading(false);
       }

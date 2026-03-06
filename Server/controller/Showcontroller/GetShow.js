@@ -20,8 +20,11 @@ export async function getShow(req, res) {
 
     if (StateId && CityId) {
       const cinemas = await Cinema.find({ StateId, CityId }); 
+      if(cinemas.length === 0) {
+        return res.json({message : "not found" , cinemas})
+      } 
       console.log("Cinemas found:", cinemas.length);
-
+      console.log(cinemas , "dd")
       if (cinemas.length > 0) {
         const cinemaIds = cinemas.map((c) => c._id);
         query.cinemaId = { $in: cinemaIds };
@@ -29,6 +32,9 @@ export async function getShow(req, res) {
     }
 
     const shows = await Show.find(query).populate("cinemaId");
+    if(!shows) {
+      return res.status(400).json({message :  "show not found"})
+    }
     console.log("Shows found:", shows.length);
 
     return res.status(200).json(shows); 
