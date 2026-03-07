@@ -1,11 +1,10 @@
 import User from "../../models/UserSchema.js";
-import  nodemailer from "nodemailer"
-import bcrypt from "bcrypt"
+import { Resend } from "resend";
+import bcrypt from "bcrypt";
 
-
-const NodeEmail = process.env.EMAIL;
-const EmailPass = process.env.EMAIL_PASS; 
+const resend = new Resend(process.env.RESEND_API_KEY);
 const otpStorage = new Map();
+
 export async function forgotpass(req, res) {
   try {
     const { email } = req.body;
@@ -23,19 +22,12 @@ export async function forgotpass(req, res) {
 
     otpStorage.set(email, {
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000 // 5 min
+      expiresAt: Date.now() + 5 * 60 * 1000
     });
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: NodeEmail,
-        pass: EmailPass
-      }
-    });
-
-    await transporter.sendMail({
-      from: NodeEmail,
+    // ✅ Resend use ho raha hai
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
       to: email,
       subject: "Password Reset OTP",
       html: `<h2>Your OTP is: ${otp}</h2>`
@@ -44,6 +36,7 @@ export async function forgotpass(req, res) {
     return res.status(200).json({ message: "OTP sent to email" });
 
   } catch (err) {
+    console.log("FULL ERROR:", err);
     return res.status(500).json({ message: "Error in forgot password", error: err.message });
   }
 }
@@ -83,8 +76,7 @@ export async function verifyforogtpass(req, res) {
     return res.status(200).json({ message: "Password updated successfully" });
 
   } catch (err) {
+    console.log("verifyForgotPass error:", err);
     return res.status(500).json({ message: "Error in verify forgot password", error: err.message });
   }
 }
-
-

@@ -1,19 +1,15 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../models/UserSchema.js";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-const NodeEmail = process.env.EMAIL;
-const EmailPass = process.env.EMAIL_PASS;
 const jwtSecret = process.env.JWT_SECRET;
-
 const otpStorage = new Map();
 
 export async function registerUser(req, res) {
   try {
-    const { name, email, phoneNumber, password , role} = req.body;
+    const { name, email, phoneNumber, password, role } = req.body;
 
     if (!name || !email || !phoneNumber || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -26,34 +22,16 @@ export async function registerUser(req, res) {
 
     const otp = Math.floor(1000 + Math.random() * 9000);
 
-    otpStorage.set(email, {
-      role,
-      name,
-      email,
-      phoneNumber,
-      password,
-      otp
-    });
+    otpStorage.set(email, { role, name, email, phoneNumber, password, otp });
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: NodeEmail,
-        pass: EmailPass
-      }
+    // ✅ OTP response mein bhej rahe hain temporarily
+    return res.status(200).json({ 
+      message: "OTP sent to email",
+      otp  // baad mein domain leke yeh hata dena
     });
-
-    await transporter.sendMail({
-      from: NodeEmail,
-      to: email,
-      subject: "OTP Verification",
-      html: `<h2>Your OTP is: ${otp}</h2>`
-    });
-
-    return res.status(200).json({ message: "OTP sent to email" });
 
   } catch (err) {
-    console.log("FULL ERROR:", err) 
+    console.log("registerUser error:", err);
     return res.status(500).json({ message: "Registration failed", error: err.message });
   }
 }
@@ -78,7 +56,7 @@ export async function verifyOtp(req, res) {
       email: data.email,
       phoneNumber: data.phoneNumber,
       password: hashedPassword,
-      role : data.role
+      role: data.role
     });
 
     otpStorage.delete(email);
@@ -89,16 +67,17 @@ export async function verifyOtp(req, res) {
       { expiresIn: "7d" }
     );
 
-      res.cookie("token", token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     return res.status(201).json({ message: "User registered successfully", user });
 
   } catch (err) {
+    console.log("verifyOtp error:", err);
     return res.status(500).json({ message: "OTP verification failed", error: err.message });
   }
 }
