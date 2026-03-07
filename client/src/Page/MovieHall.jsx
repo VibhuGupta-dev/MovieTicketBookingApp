@@ -6,6 +6,8 @@ import AuthBox from "../Components/Auth";
 import NavbarHall from "../Components/NavbarHall";
 const ROW_LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const LOCK_DURATION = 10 * 60;
+const backendUrl = import.meta.env.VITE_BACKEND_URI
+
 
 export function MovieHall() {
     const socket = useRef(null);
@@ -60,7 +62,7 @@ export function MovieHall() {
             setError(null);
             try {
                 const cinemaRes = await axios.get(
-                    `http://localhost:3000/cinemahall/api/getcinemahall/${cinemaId}`
+                    `${backendUrl}/cinemahall/api/getcinemahall/${cinemaId}`
                 );
                 const hallData = Array.isArray(cinemaRes.data)
                     ? cinemaRes.data[0]
@@ -71,7 +73,7 @@ export function MovieHall() {
                 setRate(seatsData[0]?.rate ?? 0);
 
                 const showRes = await axios.get(
-                    `http://localhost:3000/show/getshow/${showId}`
+                    `${backendUrl}/show/getshow/${showId}`
                 );
                 const showData = Array.isArray(showRes.data) ? showRes.data[0] : showRes.data;
                 const timeSlot = showData?.timeSlots?.find(
@@ -204,7 +206,7 @@ export function MovieHall() {
 
     try {
         const response = await axios.post(
-            `http://localhost:3000/seat/api/bookseat/${showId}/${timeId}`,
+            `${backendUrl}/seat/api/bookseat/${showId}/${timeId}`,
             { seatsId: selectedSeats },
             { withCredentials: true }
         );
@@ -259,7 +261,7 @@ export function MovieHall() {
         // Backend se SeatBooking delete karo
         if (bookingId) {
             try {
-                await axios.delete(`http://localhost:3000/seat/api/deletebookseat/${bookingId}`);
+                await axios.delete(`${backendUrl}/seat/api/deletebookseat/${bookingId}`);
             } catch (err) {
                 console.error("Failed to delete booking:", err);
             }

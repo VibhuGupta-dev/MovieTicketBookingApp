@@ -6,6 +6,9 @@ import { Footer } from "../Components/Footer";
 import { useNavigate } from "react-router-dom";
 import { FAQ } from "../Components/Faq";
 
+
+const backendUrl = import.meta.env.VITE_BACKEND_URI
+
 export function MoviePage() {
   const navigate = useNavigate()
   const [selectedStateId, setSelectedStateId] = useState(null);
@@ -77,7 +80,7 @@ const handlebooknow = (e) => {
       
       try {
         const response = await axios.get(
-          "http://localhost:3000/movie/api/allmovie",
+          `${backendUrl}/movie/api/allmovie`,
         );
         
         // ===== DEBUG CONSOLE 4: API Response =====

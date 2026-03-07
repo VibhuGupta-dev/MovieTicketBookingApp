@@ -5,7 +5,7 @@ import axios from "axios";
 import logo from "../assets/Ristrict.png";
 import AuthBox from "./Auth";
 
-const API = "http://localhost:3000/user";
+const API = import.meta.env.VITE_BACKEND_URI
 
 export default function NavbarHall() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("token"));
@@ -44,7 +44,7 @@ export default function NavbarHall() {
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
-      await axios.post(`${API}/api/logout`, {}, { withCredentials: true });
+      await axios.post(`${API}/user/api/logout`, {}, { withCredentials: true });
     } catch (err) {
       // fail silently, clear locally anyway
       console.log(err)

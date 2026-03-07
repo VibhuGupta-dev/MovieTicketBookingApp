@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Calendar from "../api/Dates";
+import { Review } from "../Components/Review";
 
-
+const backendUrl = import.meta.env.VITE_BACKEND_URI
 export function MovieInfoPage() {
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +31,7 @@ const today = formatDateLocal(new Date());
     const fetchMovie = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/movie/api/getmovie/${id}`
+          `${backendUrl}/movie/api/getmovie/${id}`
         );
         const data = response.data || {};
         if (mounted) {
@@ -333,6 +334,7 @@ navigate(`/${id}/cinemas/${today}`, {
           </div>
         </div>
       </div>
+      <Review />
     </>
   );
 }

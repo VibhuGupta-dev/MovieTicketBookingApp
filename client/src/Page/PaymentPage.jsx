@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
-const API = "http://localhost:3000";
+const API = import.meta.env.VITE_BACKEND_URI
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID
 
 function loadRazorpayScript() {

@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AuthBox from "../Components/Auth";
+const backendUrl = import.meta.env.VITE_BACKEND_URI
 
 export function BillPage() {
   const { showId, bookingId } = useParams();
@@ -43,7 +44,7 @@ export function BillPage() {
   // ── Fetch logged-in user ──
   useEffect(() => {
     axios
-      .get("http://localhost:3000/user/api/me", { withCredentials: true })
+      .get(`${backendUrl}/user/api/me`, { withCredentials: true })
       .then((res) => setUser(res.data?.user ?? res.data))
       .catch(() => setUser(null));
   }, []);
@@ -61,7 +62,7 @@ export function BillPage() {
 
   async function handleLogout() {
     try {
-      await axios.post("http://localhost:3000/user/api/logout", {}, { withCredentials: true });
+      await axios.post(`${backendUrl}/user/api/logout`, {}, { withCredentials: true });
     } catch (err) {
       console.log(err)
     }
@@ -74,8 +75,8 @@ export function BillPage() {
     const fetchAll = async () => {
       try {
         const [bookingRes, showRes] = await Promise.all([
-          axios.get(`http://localhost:3000/seat/api/getbookedseat/${bookingId}`),
-          axios.get(`http://localhost:3000/show/getshow/${showId}`),
+          axios.get(`${backendUrl}/seat/api/getbookedseat/${bookingId}`),
+          axios.get(`${backendUrl}/show/getshow/${showId}`),
         ]);
 
         const showArr = Array.isArray(showRes.data) ? showRes.data : [showRes.data];
@@ -132,7 +133,7 @@ export function BillPage() {
     let mounted = true;
     const fetchMovie = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/movie/api/getmovie/${movieId}`);
+        const res = await axios.get(`${backendUrl}/movie/api/getmovie/${movieId}`);
         const data = Array.isArray(res.data) ? res.data[0] : res.data;
         if (!mounted) return;
         setMovieName(data?.MovieName ?? "—");
@@ -155,7 +156,7 @@ export function BillPage() {
     let mounted = true;
     const fetchCinema = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/cinemahall/api/getcinemahall/${cinemaId}`);
+        const res = await axios.get(`${backendUrl}/cinemahall/api/getcinemahall/${cinemaId}`);
         const data = res.data;
         const hallData = Array.isArray(data) ? data[0] : data;
         if (!mounted) return;

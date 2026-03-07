@@ -13,15 +13,19 @@ import { Server } from "socket.io"
 import { socketHandler } from "./controller/TicketBookingController/Lockticket.js"
 import paymentrouter from "./routes/PaymentRoutes.js"
 import seatbookinrouter from "./routes/SeatBookRoutes.js"
-import dotenv from "dotenv";
+import dotenv from "dotenv"
 
-const PORT = 3000
+dotenv.config()
+
+const PORT = process.env.PORT || 3000
+const CLIENT_URL = process.env.CLIENT_URL
+
 const app = express()
 export const server = createServer(app)
-dotenv.config();
+
 export const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: CLIENT_URL,
     methods: ["GET", "POST"]
   }
 })
@@ -34,26 +38,25 @@ app.use(cookieParser())
 app.use(express.json())
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: CLIENT_URL,
   credentials: true
 }))
+
 socketHandler(io)
 connectmongodb()
 
-app.get("/" , (req , res) => {
+app.get("/", (req, res) => {
   res.send("hey there")
 })
 
-
-app.use('/user' , userrouter)
-app.use('/cinemahall' , cinimaroute)
-app.use('/movie' , movierouter)
-app.use('/rate' , movierateing)
-app.use('/ticket' , ticketrouter)
-app.use('/show' , showroute)
-app.use('/payment' , paymentrouter)
-app.use('/seat' , seatbookinrouter)
-
+app.use('/user', userrouter)
+app.use('/cinemahall', cinimaroute)
+app.use('/movie', movierouter)
+app.use('/rate', movierateing)
+app.use('/ticket', ticketrouter)
+app.use('/show', showroute)
+app.use('/payment', paymentrouter)
+app.use('/seat', seatbookinrouter)
 
 server.listen(PORT, () => {
   console.log(`server running on ${PORT}`)

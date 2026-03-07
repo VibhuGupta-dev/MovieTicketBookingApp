@@ -6,6 +6,9 @@ import Calendar from "../api/Dates";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Footer } from "../Components/Footer";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URI
+
 export function AllcinemaMoviebased() {
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedCityId, setSelectedCityId] = useState(null);
@@ -26,7 +29,7 @@ export function AllcinemaMoviebased() {
       setError(null);
       try {
         const response = await axios.get(
-          `http://localhost:3000/show/getshow/${id}/${date}`,
+          `${backendUrl}/show/getshow/${id}/${date}`,
           {
             params: {
               StateId: selectedStateId,

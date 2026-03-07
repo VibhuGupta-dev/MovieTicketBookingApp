@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const USER_API  = "http://localhost:3000/user";
-const MOVIE_API = "http://localhost:3000/movie";
+const USER_API  = `${import.meta.env.VITE_BACKEND_URI}/user`;
+const MOVIE_API = `${import.meta.env.VITE_BACKEND_URI}/movie`;
 
 const EMPTY_MOVIE = {
   MovieName: "", MovieLength: "", Moviegenre: "", MovieTrailer: "",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const backendUrl = import.meta.env.VITE_BACKEND_URI
 
 export default function AllMovies() {
  
@@ -12,14 +13,14 @@ export default function AllMovies() {
   const handleOnClick = (id) => {
     navigate(`/Movie/${id}`);
   };
-
+ 
   useEffect(() => {
     let mounted = true;
 
     const fetchMovies = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/movie/api/allmovie"
+          `${backendUrl}/movie/api/allmovie`
         );
         const data = response.data || [];
         console.log(data);

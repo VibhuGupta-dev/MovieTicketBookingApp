@@ -6,7 +6,7 @@ import locationIcon from "../assets/location.png";
 import { getCitiesByState, getStatesByCountry, testApiKey } from "../api/GetStatesByCountry";
 import AuthBox from "./Auth";
 
-const API = "http://localhost:3000/user";
+const API = import.meta.env.VITE_BACKEND_URI
 
 export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
   const [states, setStates] = useState([]);
@@ -42,7 +42,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
   useEffect(() => {
     if (isLoggedIn) {
       axios
-        .get("http://localhost:3000/user/api/me", { withCredentials: true })
+        .get(`${API}/user/api/me`, { withCredentials: true })
         .then((res) => setUser(res.data.user))
         .catch(() => setUser(null));
     } else {
@@ -70,7 +70,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
-      await axios.post(`${API}/api/logout`, {}, { withCredentials: true });
+      await axios.post(`${API}/user/api/logout`, {}, { withCredentials: true });
     } catch (err) {
       console.log(err);
     } finally {

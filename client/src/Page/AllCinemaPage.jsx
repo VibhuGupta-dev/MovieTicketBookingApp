@@ -3,6 +3,9 @@ import Navbar from "../Components/Navbar";
 import axios from "axios";
 import { Footer } from "../Components/Footer";
 import { useNavigate } from "react-router-dom";
+
+ const backendUrl = import.meta.env.VITE_BACKEND_URI
+
 export function AllCinemaPage() {
   console.log("🎥 AllCinemaPage: Component rendering");
    const navigate = useNavigate();
@@ -12,7 +15,7 @@ export function AllCinemaPage() {
   const [cinemas, setCinemas] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
- 
+
 
   useEffect(() => {
     if (!selectedStateId || !selectedCityId) {
@@ -31,7 +34,7 @@ export function AllCinemaPage() {
       try {
         // ===== CHANGED: Using GET with query params =====
         const response = await axios.get(
-          "http://localhost:3000/cinemahall/api/getcinemalocation",
+          `${backendUrl}/cinemahall/api/getcinemalocation`,
           {
             params: {  // Query parameters ke liye
               StateId: selectedStateId,

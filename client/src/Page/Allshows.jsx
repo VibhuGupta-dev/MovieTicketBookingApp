@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 import Navbar from "../Components/Navbar"
 import { Footer } from "../Components/Footer"
+ const backendUrl = import.meta.env.VITE_BACKEND_URI
 
 export function Allshows() {
     const { cinemahallID } = useParams()
@@ -15,7 +16,7 @@ export function Allshows() {
         async function fetchCinema() {
             try {
                 const { data } = await axios.get(
-                    `http://localhost:3000/cinemahall/api/getcinemahall/${cinemahallID}`
+                    `${backendUrl}/cinemahall/api/getcinemahall/${cinemahallID}`
                 )
                 console.log(data)
                 setCinema(data)

@@ -2,10 +2,11 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-const API = "http://localhost:3000/user";
+const API = import.meta.env.VITE_BACKEND_URI
+
 
 export default function AuthBox({ onClose }) {
-
+console.log(API)
   const [screen, setScreen] = useState("signin");
 
   const [signInForm, setSignInForm] = useState({ email: "", password: "" });
@@ -27,7 +28,8 @@ export default function AuthBox({ onClose }) {
     clearMessages();
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/api/login`, signInForm, { withCredentials: true });
+      const res = await axios.post(`${API}/user/api/login`, signInForm, { withCredentials: true });
+      console.log(res)
       console.log("LOGIN RESPONSE:", res.data);
       // ✅ Save token so navbar persists login across refreshes
       const token = res.data.token || res.data.accessToken || res.data.jwt;
@@ -54,7 +56,7 @@ export default function AuthBox({ onClose }) {
     clearMessages();
     setLoading(true);
     try {
-      await axios.post(`${API}/api/register`, { ...signUpForm, role: "user" });
+      await axios.post(`${API}/user/api/register`, { ...signUpForm, role: "user" });
       setSuccess("OTP sent to your email!");
       setScreen("otp-signup");
     } catch (err) {
@@ -70,7 +72,7 @@ export default function AuthBox({ onClose }) {
     clearMessages();
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
+      const res = await axios.post(`${API}/user/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
 
       // ✅ Save token so navbar persists login across refreshes
       const token = res.data.token || res.data.accessToken || res.data.jwt;
@@ -91,7 +93,7 @@ export default function AuthBox({ onClose }) {
     clearMessages();
     setLoading(true);
     try {
-      await axios.post(`${API}/api/forgotpass`, { email: forgotEmail });
+      await axios.post(`${API}/user/api/forgotpass`, { email: forgotEmail });
       setSuccess("OTP sent to your email!");
       setScreen("otp-forgot");
     } catch (err) {
@@ -107,7 +109,7 @@ export default function AuthBox({ onClose }) {
     clearMessages();
     setLoading(true);
     try {
-      await axios.post(`${API}/api/veryfyforgototp`, { email: forgotEmail, otp: forgotOtp, newpass: newPass });
+      await axios.post(`${API}/user/api/veryfyforgototp`, { email: forgotEmail, otp: forgotOtp, newpass: newPass });
       setSuccess("Password updated! Please sign in.");
       setTimeout(() => { setScreen("signin"); clearMessages(); }, 1200);
     } catch (err) {

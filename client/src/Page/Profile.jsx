@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import Navbar from "../Components/Navbar"
-
+const backendUrl = import.meta.env.VITE_BACKEND_URI
 const fmt = {
   date: (iso) => new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
   time: (iso) => new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
@@ -20,7 +20,7 @@ export function Profile() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/user/api/me", { withCredentials: true })
+      .get(`${backendUrl}/user/api/me`, { withCredentials: true })
       .then((res) => setUser(res.data.user))
       .catch(console.error)
       .finally(() => setLoadingUser(false))
@@ -35,7 +35,7 @@ export function Profile() {
     setLoadingTicket(true)
     try {
       const res = await axios.get(
-        `http://localhost:3000/ticket/api/${ticketId}`,
+        `${backendUrl}/ticket/api/${ticketId}`,
         { withCredentials: true }
       )
       setTicket(res.data.yticket)

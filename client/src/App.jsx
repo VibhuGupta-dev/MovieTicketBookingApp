@@ -10,6 +10,7 @@ import { Profile } from "./Page/Profile";
 import { Allshows } from "./Page/Allshows";
 import { OwnerPage } from "./Page/OwnerPage";
 import { AdminPage } from "./Page/AdminPage";
+import { Offer } from "./Page/Offer";
 import ProtectedRoute from "./Components/ProtectedRoute";
 export default function App() {
   return (
@@ -30,6 +31,8 @@ export default function App() {
         <Route path="/payment/:bookingId" element={<PaymentPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/:cinemahallID" element={<Allshows />} />
+                <Route path="/offers" element={<Offer />} />
+
         <Route
           path="/ownerpage"
           element={

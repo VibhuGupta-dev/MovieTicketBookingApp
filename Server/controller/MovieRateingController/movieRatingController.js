@@ -7,7 +7,10 @@ export async function rateMovie(req, res) {
     const { rating, review } = req.body;
     const movieId = req.movieId;
     const userId = req.ratingUserId;
-
+const user = await MovieRating.find({userId : userId}) 
+if(user) {
+  return res.json({message : "only one rating is allowed"})
+}
     if (!rating) {
       return res.status(400).json({ message: "rating is required" });
     }
