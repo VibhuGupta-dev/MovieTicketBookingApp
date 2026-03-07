@@ -261,7 +261,7 @@ export function MovieHall() {
         // Backend se SeatBooking delete karo
         if (bookingId) {
             try {
-                await axios.delete(`${backendUrl}/seat/api/deletebookseat/${bookingId}`);
+                await axios.delete(`${backendUrl}/seat/api/deletebookseat/${bookingId}` , {withCredentials : true});
             } catch (err) {
                 console.error("Failed to delete booking:", err);
             }

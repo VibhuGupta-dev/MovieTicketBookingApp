@@ -17,25 +17,33 @@ const seatBookingSchema = mongoose.Schema({
             ref: "Seat",
         }
     ],
-    BookingRefrence : {
-        type : String
+    BookingRefrence: {
+        type: String
     },
     isBooked: {
         type: Boolean,
-        default: false,  
+        default: false,
     },
     isLocked: {
         type: Boolean,
-        default: false,  
+        default: false,
     },
     lockedAt: {
         type: Date,
-        default: null,  
+        default: null,
     },
     lockedUntil: {
         type: Date,
-        default: null, 
+        default: null,
     },
 }, { timestamps: true });
+
+seatBookingSchema.index(
+    { lockedUntil: 1 },
+    {
+        expireAfterSeconds: 0,
+        partialFilterExpression: { isBooked: false }
+    }
+);
 
 export default mongoose.model("SeatBooking", seatBookingSchema);
