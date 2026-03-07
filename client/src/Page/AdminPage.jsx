@@ -11,20 +11,13 @@ const EMPTY_MOVIE = {
 };
 const EMPTY_ACTOR = { ActorName: "", ActorPhoto: "", RoleInMovie: "" };
 
-// ── shared classes at module level ──
 const inputCls = "w-full bg-gray-900 border border-gray-700/60 rounded-xl px-4 py-3 text-sm text-gray-200 placeholder-gray-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200";
 const labelCls = "block text-[10.5px] font-bold uppercase tracking-widest text-gray-500 mb-2";
 const btnCls   = "w-full py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-sm font-semibold rounded-xl transition-all duration-200 tracking-wide shadow-lg shadow-indigo-900/40 disabled:opacity-40 disabled:cursor-not-allowed";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// !! CRITICAL: MovieFields is defined OUTSIDE AdminPage so React never
-//    recreates it on re-render — keeps input focus intact on every keystroke.
-// ─────────────────────────────────────────────────────────────────────────────
 function MovieFields({ form, onUpdate, castArr, onUpdateCast, onAddCast, onRemoveCast }) {
   return (
     <div className="space-y-8">
-
-      {/* ── Basic Info ── */}
       <div>
         <SectionDivider label="Basic Info" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -69,8 +62,6 @@ function MovieFields({ form, onUpdate, castArr, onUpdateCast, onAddCast, onRemov
           </div>
         </div>
       </div>
-
-      {/* ── Media ── */}
       <div>
         <SectionDivider label="Media" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -91,8 +82,6 @@ function MovieFields({ form, onUpdate, castArr, onUpdateCast, onAddCast, onRemov
           </div>
         </div>
       </div>
-
-      {/* ── Cast ── */}
       <div>
         <div className="flex items-center gap-3 mb-5">
           <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-400">Cast <Req /></span>
@@ -143,14 +132,11 @@ function MovieFields({ form, onUpdate, castArr, onUpdateCast, onAddCast, onRemov
           ))}
         </div>
       </div>
-
     </div>
   );
 }
 
-// ── tiny helpers (also outside) ──
 function Req() { return <span className="text-red-500/70">*</span>; }
-
 function SectionDivider({ label }) {
   return (
     <div className="flex items-center gap-3 mb-5">
@@ -159,7 +145,6 @@ function SectionDivider({ label }) {
     </div>
   );
 }
-
 function Spinner({ label }) {
   return (
     <span className="flex items-center justify-center gap-2">
@@ -172,17 +157,26 @@ function Spinner({ label }) {
   );
 }
 
-// =============================================================================
-// MAIN COMPONENT
-// =============================================================================
+// ✅ Prototype banner
+function PrototypeBanner() {
+  return (
+    <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2 mb-5">
+      <span className="text-amber-400 text-base">⚠️</span>
+      <p className="text-xs text-amber-400/90">
+        <span className="font-semibold">Prototype Mode</span> — Email delivery is disabled. Your OTP will be shown on screen.
+      </p>
+    </div>
+  );
+}
+
 export function AdminPage() {
-  // 0 = Make Owner | 1 = Add Movie | 2 = All Movies
   const [section, setSection] = useState(0);
 
   // ── Owner signup ──
   const [screen, setScreen]         = useState("signup");
   const [signUpForm, setSignUpForm]  = useState({ name: "", email: "", phoneNumber: "", password: "" });
   const [otp, setOtp]               = useState("");
+  const [otpHint, setOtpHint]       = useState(""); // ✅ OTP hint
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState("");
   const [success, setSuccess]       = useState("");
@@ -195,10 +189,10 @@ export function AdminPage() {
   const [movieError, setMovieError]     = useState("");
   const [movieSuccess, setMovieSuccess] = useState("");
 
-  const updateMovie     = (f, v) => setMovieForm((p) => ({ ...p, [f]: v }));
-  const updateCast      = (i, f, v) => setCast((p) => p.map((c, idx) => idx === i ? { ...c, [f]: v } : c));
-  const addCastRow      = () => setCast((p) => [...p, { ...EMPTY_ACTOR }]);
-  const removeCastRow   = (i) => setCast((p) => p.filter((_, idx) => idx !== i));
+  const updateMovie   = (f, v) => setMovieForm((p) => ({ ...p, [f]: v }));
+  const updateCast    = (i, f, v) => setCast((p) => p.map((c, idx) => idx === i ? { ...c, [f]: v } : c));
+  const addCastRow    = () => setCast((p) => [...p, { ...EMPTY_ACTOR }]);
+  const removeCastRow = (i) => setCast((p) => p.filter((_, idx) => idx !== i));
 
   // ── All Movies ──
   const [movies, setMovies]               = useState([]);
@@ -213,9 +207,9 @@ export function AdminPage() {
   const [editError, setEditError]       = useState("");
   const [editSuccess, setEditSuccess]   = useState("");
 
-  const updateEdit      = (f, v) => setEditForm((p) => ({ ...p, [f]: v }));
-  const updateEditCast  = (i, f, v) => setEditCast((p) => p.map((c, idx) => idx === i ? { ...c, [f]: v } : c));
-  const addEditCastRow  = () => setEditCast((p) => [...p, { ...EMPTY_ACTOR }]);
+  const updateEdit        = (f, v) => setEditForm((p) => ({ ...p, [f]: v }));
+  const updateEditCast    = (i, f, v) => setEditCast((p) => p.map((c, idx) => idx === i ? { ...c, [f]: v } : c));
+  const addEditCastRow    = () => setEditCast((p) => [...p, { ...EMPTY_ACTOR }]);
   const removeEditCastRow = (i) => setEditCast((p) => p.filter((_, idx) => idx !== i));
 
   // ── Delete confirm ──
@@ -226,8 +220,11 @@ export function AdminPage() {
   async function handleSignUp(e) {
     e.preventDefault(); clearMessages(); setLoading(true);
     try {
-      await axios.post(`${USER_API}/api/register`, { ...signUpForm, role: "owner" });
-      setSuccess("OTP sent to your email!"); setScreen("otp-signup");
+      const res = await axios.post(`${USER_API}/api/register`, { ...signUpForm, role: "owner" });
+      // ✅ OTP hint set karo
+      if (res.data.otp) setOtpHint(`${res.data.otp}`);
+      setSuccess("OTP sent to your email!");
+      setScreen("otp-signup");
     } catch (err) { setError(err?.response?.data?.message || "Registration failed"); }
     finally { setLoading(false); }
   }
@@ -235,8 +232,11 @@ export function AdminPage() {
   async function handleVerifySignupOtp(e) {
     e.preventDefault(); clearMessages(); setLoading(true);
     try {
-      const res = await axios.post(`${USER_API}/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
-      console.log(res); setSuccess("Account created!"); setScreen("signup");
+      await axios.post(`${USER_API}/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
+      setSuccess("Owner account created!");
+      setScreen("signup");
+      setOtpHint("");
+      setOtp("");
     } catch (err) { setError(err?.response?.data?.message || "OTP verification failed"); }
     finally { setLoading(false); }
   }
@@ -305,11 +305,9 @@ export function AdminPage() {
     finally { setEditLoading(false); }
   }
 
-  // ─────────────────────────── RENDER ──────────────────────────────────
   return (
     <div className="min-h-screen w-full bg-[#070b14] flex flex-col items-center overflow-x-hidden">
 
-      {/* bg blobs */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-violet-600/8 rounded-full blur-[100px]" />
@@ -319,7 +317,6 @@ export function AdminPage() {
 
       <div className="relative z-10 flex flex-col items-center w-full px-4 pt-10 pb-16">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
@@ -331,7 +328,6 @@ export function AdminPage() {
           <p className="mt-2 text-xs text-gray-600 tracking-wide">Manage owners &amp; content from one place</p>
         </div>
 
-        {/* 3-way Toggle */}
         <div className="inline-flex items-center bg-[#0e1120] border border-indigo-500/15 rounded-full p-1.5 cursor-pointer select-none mb-8 shadow-xl shadow-black/30 backdrop-blur-md">
           {[["Make An Owner", 0], ["Add A Movie", 1], ["All Movies", 2]].map(([label, idx]) => (
             <span key={idx} onClick={() => setSection(idx)}
@@ -365,9 +361,6 @@ export function AdminPage() {
                   <>
                     <h2 className="text-center text-2xl font-bold text-white tracking-tight mb-1">Create Owner Account</h2>
                     <p className="text-center text-xs text-gray-600 mb-6">Fill in the details below to register a new owner</p>
-                    <div className="flex bg-gray-800/40 rounded-xl p-1 mb-6 border border-gray-700/40">
-                      <button className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow shadow-indigo-900/40 tracking-wide">Make an Owner</button>
-                    </div>
                     <form onSubmit={handleSignUp} className="space-y-4">
                       <div><label className={labelCls}>Full Name</label>
                         <input type="text" placeholder="Jane Doe" className={inputCls} value={signUpForm.name} onChange={(e) => setSignUpForm({ ...signUpForm, name: e.target.value })} required /></div>
@@ -387,8 +380,26 @@ export function AdminPage() {
                 {screen === "otp-signup" && (
                   <>
                     <h2 className="text-center text-2xl font-bold text-white tracking-tight mb-1">Verify Email</h2>
-                    <p className="text-center text-sm text-gray-500 mb-1">We sent a 4-digit OTP to</p>
-                    <p className="text-center text-sm font-semibold text-indigo-400 mb-8">{signUpForm.email}</p>
+                    <p className="text-center text-sm text-gray-500 mb-1">OTP for</p>
+                    <p className="text-center text-sm font-semibold text-indigo-400 mb-5">{signUpForm.email}</p>
+
+                    {/* ✅ Prototype banner */}
+                    <PrototypeBanner />
+
+                    {/* ✅ OTP hint box */}
+                    {otpHint && (
+                      <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 mb-5">
+                        <div>
+                          <p className="text-xs text-indigo-400/70 uppercase tracking-widest font-semibold mb-0.5">Your OTP</p>
+                          <p className="text-2xl font-bold tracking-[0.3em] text-indigo-300">{otpHint}</p>
+                        </div>
+                        <button type="button" onClick={() => setOtp(otpHint)}
+                          className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-all font-medium">
+                          Auto-fill
+                        </button>
+                      </div>
+                    )}
+
                     <form onSubmit={handleVerifySignupOtp} className="space-y-4">
                       <div><label className={labelCls}>Enter OTP</label>
                         <input type="text" inputMode="numeric" maxLength={4} placeholder="- - - -"
@@ -399,29 +410,11 @@ export function AdminPage() {
                       <button type="submit" disabled={loading} className={btnCls}>{loading ? "Verifying…" : "Verify OTP"}</button>
                     </form>
                     <p className="text-center text-xs text-gray-600 mt-6">Wrong email?{" "}
-                      <span onClick={() => { setScreen("signup"); clearMessages(); setOtp(""); }} className="text-indigo-400 hover:text-indigo-300 cursor-pointer transition-colors">Go back</span>
+                      <span onClick={() => { setScreen("signup"); clearMessages(); setOtp(""); setOtpHint(""); }}
+                        className="text-indigo-400 hover:text-indigo-300 cursor-pointer transition-colors">Go back</span>
                     </p>
                   </>
                 )}
-
-                {screen === "forgot" && (
-                  <>
-                    <button onClick={() => { setScreen("signin"); clearMessages(); }} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-sm mb-6 transition-colors">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                      Back to Sign In
-                    </button>
-                    <h2 className="text-2xl font-bold text-white tracking-tight mb-1">Forgot Password</h2>
-                    <p className="text-sm text-gray-500 mb-7 leading-relaxed">Enter your registered email to receive a reset OTP</p>
-                  </>
-                )}
-
-                {screen === "otp-forgot" && (
-                  <button onClick={() => { setScreen("forgot"); clearMessages(); }} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-sm mb-6 transition-colors">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                    Back
-                  </button>
-                )}
-
               </div>
             </div>
           )}
@@ -441,13 +434,8 @@ export function AdminPage() {
                     <p className="text-xs text-gray-600 mt-0.5">Fill all required fields and add cast members</p>
                   </div>
                 </div>
-
                 <form onSubmit={handleAddMovie}>
-                  <MovieFields
-                    form={movieForm}    onUpdate={updateMovie}
-                    castArr={cast}      onUpdateCast={updateCast}
-                    onAddCast={addCastRow} onRemoveCast={removeCastRow}
-                  />
+                  <MovieFields form={movieForm} onUpdate={updateMovie} castArr={cast} onUpdateCast={updateCast} onAddCast={addCastRow} onRemoveCast={removeCastRow} />
                   <div className="mt-6 space-y-3">
                     {movieError   && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">{movieError}</p>}
                     {movieSuccess && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2.5">{movieSuccess}</p>}
@@ -464,7 +452,6 @@ export function AdminPage() {
           {section === 2 && (
             <div className="w-full max-w-5xl">
               <div className="w-full bg-[#0a0e1a]/80 border border-white/[0.06] rounded-3xl shadow-2xl shadow-black/60 p-8 backdrop-blur-xl ring-1 ring-inset ring-white/[0.04]">
-
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center flex-shrink-0">
@@ -495,11 +482,9 @@ export function AdminPage() {
                     <span className="text-sm text-gray-600">Loading movies…</span>
                   </div>
                 )}
-
                 {moviesError && !moviesLoading && (
                   <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">{moviesError}</p>
                 )}
-
                 {!moviesLoading && !moviesError && movies.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <div className="w-14 h-14 rounded-2xl bg-gray-800/60 border border-gray-700/40 flex items-center justify-center">
@@ -510,13 +495,11 @@ export function AdminPage() {
                     <p className="text-sm text-gray-600">No movies found</p>
                   </div>
                 )}
-
                 {!moviesLoading && movies.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {movies.map((movie) => (
                       <div key={movie._id}
                         className="group relative bg-gray-900/60 border border-gray-700/40 rounded-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-900/20">
-
                         <div className="relative h-40 bg-gray-800/80 overflow-hidden">
                           {movie.MovieBackgroundPhoto || movie.MoviePhoto ? (
                             <img src={movie.MovieBackgroundPhoto || movie.MoviePhoto} alt={movie.MovieName}
@@ -539,7 +522,6 @@ export function AdminPage() {
                             </div>
                           )}
                         </div>
-
                         <div className="p-4">
                           <h3 className="text-sm font-bold text-white truncate mb-1">{movie.MovieName}</h3>
                           <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -571,11 +553,9 @@ export function AdminPage() {
                     ))}
                   </div>
                 )}
-
               </div>
             </div>
           )}
-
         </div>
       </div>
 
@@ -602,13 +582,8 @@ export function AdminPage() {
                 </svg>
               </button>
             </div>
-
             <form onSubmit={handleUpdate}>
-              <MovieFields
-                form={editForm}       onUpdate={updateEdit}
-                castArr={editCast}    onUpdateCast={updateEditCast}
-                onAddCast={addEditCastRow} onRemoveCast={removeEditCastRow}
-              />
+              <MovieFields form={editForm} onUpdate={updateEdit} castArr={editCast} onUpdateCast={updateEditCast} onAddCast={addEditCastRow} onRemoveCast={removeEditCastRow} />
               <div className="mt-6 space-y-3">
                 {editError   && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">{editError}</p>}
                 {editSuccess && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2.5">{editSuccess}</p>}

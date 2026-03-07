@@ -1,25 +1,22 @@
-// Auth.jsx
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 const API = import.meta.env.VITE_BACKEND_URI
 
-
 export default function AuthBox({ onClose }) {
-console.log(API)
   const [screen, setScreen] = useState("signin");
-
   const [signInForm, setSignInForm] = useState({ email: "", password: "" });
   const [signUpForm, setSignUpForm] = useState({ name: "", email: "", phoneNumber: "", password: "" });
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotOtp, setForgotOtp] = useState("");
   const [newPass, setNewPass] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpHint, setOtpHint] = useState(""); // ✅ OTP hint for prototype
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const clearMessages = () => { setError(""); setSuccess(""); };
 
   // ── Sign In ──
@@ -29,18 +26,11 @@ console.log(API)
     setLoading(true);
     try {
       const res = await axios.post(`${API}/user/api/login`, signInForm, { withCredentials: true });
-      console.log(res)
-      console.log("LOGIN RESPONSE:", res.data);
-      // ✅ Save token so navbar persists login across refreshes
       const token = res.data.token || res.data.accessToken || res.data.jwt;
       if (token) localStorage.setItem("token", token);
-      const data = res.data.role
-      if(data == "owner"){
-         navigate("/ownerpage")
-      }
-      if(data == "Admin") {
-        navigate('/AdminPage')
-      }
+      const data = res.data.role;
+      if (data == "owner") navigate("/ownerpage");
+      if (data == "Admin") navigate('/AdminPage');
       setSuccess("Logged in successfully!");
       setTimeout(() => onClose?.(res.data.user || true), 1000);
     } catch (err) {
@@ -56,7 +46,11 @@ console.log(API)
     clearMessages();
     setLoading(true);
     try {
-      await axios.post(`${API}/user/api/register`, { ...signUpForm, role: "user" });
+      const res = await axios.post(`${API}/user/api/register`, { ...signUpForm, role: "user" });
+      // ✅ OTP response mein aa raha hai prototype ke liye
+      if (res.data.otp) {
+        setOtpHint(`${res.data.otp}`);
+      }
       setSuccess("OTP sent to your email!");
       setScreen("otp-signup");
     } catch (err) {
@@ -73,11 +67,8 @@ console.log(API)
     setLoading(true);
     try {
       const res = await axios.post(`${API}/user/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
-
-      // ✅ Save token so navbar persists login across refreshes
       const token = res.data.token || res.data.accessToken || res.data.jwt;
       if (token) localStorage.setItem("token", token);
-
       setSuccess("Account created! You're now logged in.");
       setTimeout(() => onClose?.(res.data.user || true), 1200);
     } catch (err) {
@@ -93,7 +84,11 @@ console.log(API)
     clearMessages();
     setLoading(true);
     try {
-      await axios.post(`${API}/user/api/forgotpass`, { email: forgotEmail });
+      const res = await axios.post(`${API}/user/api/forgotpass`, { email: forgotEmail });
+      // ✅ OTP hint for prototype
+      if (res.data.otp) {
+        setOtpHint(`${res.data.otp}`);
+      }
       setSuccess("OTP sent to your email!");
       setScreen("otp-forgot");
     } catch (err) {
@@ -122,6 +117,16 @@ console.log(API)
   const inputCls = "w-full bg-gray-800/70 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 placeholder-gray-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all";
   const labelCls = "block text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2";
   const btnCls   = "w-full py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-sm font-semibold rounded-xl transition-all duration-200 tracking-wide shadow-lg shadow-indigo-900/30 disabled:opacity-50 disabled:cursor-not-allowed";
+
+  // ✅ Prototype banner
+  const PrototypeBanner = () => (
+    <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2 mb-5">
+      <span className="text-amber-400 text-base">⚠️</span>
+      <p className="text-xs text-amber-400/90">
+        <span className="font-semibold">Prototype Mode</span> — Email delivery is disabled. Your OTP will be shown on screen.
+      </p>
+    </div>
+  );
 
   return (
     <div
@@ -173,17 +178,14 @@ console.log(API)
                   value={signInForm.password}
                   onChange={(e) => setSignInForm({ ...signInForm, password: e.target.value })} required />
               </div>
-
               <div className="flex justify-end">
                 <button type="button" onClick={() => { setScreen("forgot"); clearMessages(); }}
                   className="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer transition-colors">
                   Forgot password?
                 </button>
               </div>
-
               {error   && <p className="text-xs text-red-400   bg-red-500/10   border border-red-500/20   rounded-lg px-3 py-2">{error}</p>}
               {success && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">{success}</p>}
-
               <button type="submit" disabled={loading} className={btnCls}>
                 {loading ? "Signing in…" : "Sign In"}
               </button>
@@ -236,10 +238,8 @@ console.log(API)
                   value={signUpForm.password}
                   onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} required />
               </div>
-
               {error   && <p className="text-xs text-red-400   bg-red-500/10   border border-red-500/20   rounded-lg px-3 py-2">{error}</p>}
               {success && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">{success}</p>}
-
               <button type="submit" disabled={loading} className={btnCls}>
                 {loading ? "Sending OTP…" : "Create Account"}
               </button>
@@ -258,7 +258,27 @@ console.log(API)
           <>
             <h2 className="text-center text-2xl font-bold text-white mb-1">Verify Email</h2>
             <p className="text-center text-sm text-gray-500 mb-1">We sent a 4-digit OTP to</p>
-            <p className="text-center text-sm font-semibold text-indigo-400 mb-8">{signUpForm.email}</p>
+            <p className="text-center text-sm font-semibold text-indigo-400 mb-5">{signUpForm.email}</p>
+
+            {/* ✅ Prototype banner */}
+            <PrototypeBanner />
+
+            {/* ✅ OTP hint box */}
+            {otpHint && (
+              <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 mb-5">
+                <div>
+                  <p className="text-xs text-indigo-400/70 uppercase tracking-widest font-semibold mb-0.5">Your OTP</p>
+                  <p className="text-2xl font-bold tracking-[0.3em] text-indigo-300">{otpHint}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setOtp(otpHint); }}
+                  className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-all font-medium"
+                >
+                  Auto-fill
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleVerifySignupOtp} className="space-y-4">
               <div>
@@ -274,10 +294,8 @@ console.log(API)
                   required
                 />
               </div>
-
               {error   && <p className="text-xs text-red-400   bg-red-500/10   border border-red-500/20   rounded-lg px-3 py-2">{error}</p>}
               {success && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">{success}</p>}
-
               <button type="submit" disabled={loading} className={btnCls}>
                 {loading ? "Verifying…" : "Verify OTP"}
               </button>
@@ -285,7 +303,7 @@ console.log(API)
 
             <p className="text-center text-xs text-gray-600 mt-6">
               Wrong email?{" "}
-              <span onClick={() => { setScreen("signup"); clearMessages(); setOtp(""); }}
+              <span onClick={() => { setScreen("signup"); clearMessages(); setOtp(""); setOtpHint(""); }}
                 className="text-indigo-400 hover:text-indigo-300 cursor-pointer transition-colors">Go back</span>
             </p>
           </>
@@ -312,10 +330,8 @@ console.log(API)
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)} required />
               </div>
-
               {error   && <p className="text-xs text-red-400   bg-red-500/10   border border-red-500/20   rounded-lg px-3 py-2">{error}</p>}
               {success && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">{success}</p>}
-
               <button type="submit" disabled={loading} className={btnCls}>
                 {loading ? "Sending OTP…" : "Send Reset OTP"}
               </button>
@@ -336,7 +352,27 @@ console.log(API)
 
             <h2 className="text-2xl font-bold text-white mb-1">Reset Password</h2>
             <p className="text-sm text-gray-500 mb-1">OTP sent to</p>
-            <p className="text-sm font-semibold text-indigo-400 mb-7">{forgotEmail}</p>
+            <p className="text-sm font-semibold text-indigo-400 mb-5">{forgotEmail}</p>
+
+            {/* ✅ Prototype banner */}
+            <PrototypeBanner />
+
+            {/* ✅ OTP hint box */}
+            {otpHint && (
+              <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 mb-5">
+                <div>
+                  <p className="text-xs text-indigo-400/70 uppercase tracking-widest font-semibold mb-0.5">Your OTP</p>
+                  <p className="text-2xl font-bold tracking-[0.3em] text-indigo-300">{otpHint}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForgotOtp(otpHint)}
+                  className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-all font-medium"
+                >
+                  Auto-fill
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleVerifyForgotOtp} className="space-y-5">
               <div>
@@ -358,10 +394,8 @@ console.log(API)
                   value={newPass}
                   onChange={(e) => setNewPass(e.target.value)} required />
               </div>
-
               {error   && <p className="text-xs text-red-400   bg-red-500/10   border border-red-500/20   rounded-lg px-3 py-2">{error}</p>}
               {success && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">{success}</p>}
-
               <button type="submit" disabled={loading} className={btnCls}>
                 {loading ? "Updating…" : "Update Password"}
               </button>
