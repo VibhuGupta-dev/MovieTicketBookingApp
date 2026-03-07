@@ -53,6 +53,7 @@ export async function registerUser(req, res) {
     return res.status(200).json({ message: "OTP sent to email" });
 
   } catch (err) {
+    console.log("FULL ERROR:", err) 
     return res.status(500).json({ message: "Registration failed", error: err.message });
   }
 }
