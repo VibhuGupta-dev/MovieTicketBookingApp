@@ -88,9 +88,11 @@ export async function verifyOtp(req, res) {
       { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+      res.cookie("token", token, {
       httpOnly: true,
-      secure: false 
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     return res.status(201).json({ message: "User registered successfully", user });
