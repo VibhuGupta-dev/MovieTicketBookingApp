@@ -23,10 +23,12 @@ const CLIENT_URL = process.env.CLIENT_URL
 const app = express()
 export const server = createServer(app)
 
+
 export const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
   }
 })
 
@@ -36,6 +38,7 @@ io.on("connection", (socket) => {
 
 app.use(cookieParser())
 app.use(express.json())
+
 
 app.use(cors({
   origin: CLIENT_URL,
