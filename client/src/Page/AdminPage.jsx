@@ -157,7 +157,6 @@ function Spinner({ label }) {
   );
 }
 
-// ✅ Prototype banner
 function PrototypeBanner() {
   return (
     <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2 mb-5">
@@ -169,18 +168,59 @@ function PrototypeBanner() {
   );
 }
 
+// ── Role config ──
+const ROLES = [
+  {
+    key: "owner",
+    label: "Owner",
+    desc: "Can manage cinema halls & shows",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+    color: "emerald",
+    activeBg: "bg-emerald-600/20 border-emerald-500/50",
+    inactiveBg: "bg-gray-800/40 border-gray-700/40 hover:border-gray-600/60",
+    activeText: "text-emerald-300",
+    activeDesc: "text-emerald-400/70",
+    activeDot: "bg-emerald-400",
+    badge: "bg-emerald-600/20 border-emerald-500/30 text-emerald-400",
+  },
+  {
+    key: "Admin",
+    label: "Admin",
+    desc: "Full platform control & access",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
+    color: "rose",
+    activeBg: "bg-rose-600/20 border-rose-500/50",
+    inactiveBg: "bg-gray-800/40 border-gray-700/40 hover:border-gray-600/60",
+    activeText: "text-rose-300",
+    activeDesc: "text-rose-400/70",
+    activeDot: "bg-rose-400",
+    badge: "bg-rose-600/20 border-rose-500/30 text-rose-400",
+  },
+];
+
 export function AdminPage() {
   const [section, setSection] = useState(0);
 
-  // ── Owner signup ──
+  // ── Account creation ──
   const [screen, setScreen]         = useState("signup");
+  const [selectedRole, setSelectedRole] = useState("owner"); // ← NEW
   const [signUpForm, setSignUpForm]  = useState({ name: "", email: "", phoneNumber: "", password: "" });
   const [otp, setOtp]               = useState("");
-  const [otpHint, setOtpHint]       = useState(""); // ✅ OTP hint
+  const [otpHint, setOtpHint]       = useState("");
   const [loading, setLoading]       = useState(false);
   const [error, setError]           = useState("");
   const [success, setSuccess]       = useState("");
   const clearMessages = () => { setError(""); setSuccess(""); };
+
+  const activeRoleConfig = ROLES.find(r => r.key === selectedRole);
 
   // ── Add Movie ──
   const [movieForm, setMovieForm]       = useState({ ...EMPTY_MOVIE });
@@ -220,10 +260,10 @@ export function AdminPage() {
   async function handleSignUp(e) {
     e.preventDefault(); clearMessages(); setLoading(true);
     try {
-      const res = await axios.post(`${USER_API}/api/register`, { ...signUpForm, role: "owner" });
-      // ✅ OTP hint set karo
+      // selectedRole use ho raha hai — owner ya Admin dono ban sakte hain
+      const res = await axios.post(`${USER_API}/api/register`, { ...signUpForm, role: selectedRole });
       if (res.data.otp) setOtpHint(`${res.data.otp}`);
-      setSuccess("OTP sent to your email!");
+      setSuccess("OTP sent to email!");
       setScreen("otp-signup");
     } catch (err) { setError(err?.response?.data?.message || "Registration failed"); }
     finally { setLoading(false); }
@@ -233,10 +273,11 @@ export function AdminPage() {
     e.preventDefault(); clearMessages(); setLoading(true);
     try {
       await axios.post(`${USER_API}/api/verifyOTP`, { email: signUpForm.email, otp }, { withCredentials: true });
-      setSuccess("Owner account created!");
+      setSuccess(`${activeRoleConfig?.label} account created successfully!`);
       setScreen("signup");
       setOtpHint("");
       setOtp("");
+      setSignUpForm({ name: "", email: "", phoneNumber: "", password: "" });
     } catch (err) { setError(err?.response?.data?.message || "OTP verification failed"); }
     finally { setLoading(false); }
   }
@@ -329,7 +370,7 @@ export function AdminPage() {
         </div>
 
         <div className="inline-flex items-center bg-[#0e1120] border border-indigo-500/15 rounded-full p-1.5 cursor-pointer select-none mb-8 shadow-xl shadow-black/30 backdrop-blur-md">
-          {[["Make An Owner", 0], ["Add A Movie", 1], ["All Movies", 2]].map(([label, idx]) => (
+          {[["Create Account", 0], ["Add A Movie", 1], ["All Movies", 2]].map(([label, idx]) => (
             <span key={idx} onClick={() => setSection(idx)}
               className={`px-5 py-2 rounded-full text-[12.5px] font-semibold tracking-wide transition-all duration-300 ${
                 section === idx ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/50" : "text-gray-500 hover:text-gray-400"
@@ -341,7 +382,7 @@ export function AdminPage() {
 
         <div className="w-full flex justify-center">
 
-          {/* ══════════════ MAKE AN OWNER ══════════════ */}
+          {/* ══════════════ CREATE ACCOUNT ══════════════ */}
           {section === 0 && (
             <div className="w-full max-w-md">
               <div className="w-full bg-[#0a0e1a]/80 border border-white/[0.06] rounded-3xl shadow-2xl shadow-black/60 p-8 backdrop-blur-xl ring-1 ring-inset ring-white/[0.04]">
@@ -359,8 +400,50 @@ export function AdminPage() {
 
                 {screen === "signup" && (
                   <>
-                    <h2 className="text-center text-2xl font-bold text-white tracking-tight mb-1">Create Owner Account</h2>
-                    <p className="text-center text-xs text-gray-600 mb-6">Fill in the details below to register a new owner</p>
+                    <h2 className="text-center text-2xl font-bold text-white tracking-tight mb-1">Create Account</h2>
+                    <p className="text-center text-xs text-gray-600 mb-6">Select a role and fill in the details</p>
+
+                    {/* ── Role Selector ── */}
+                    <div className="mb-6">
+                      <label className={labelCls}>Select Role <Req /></label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {ROLES.map((role) => {
+                          const isActive = selectedRole === role.key;
+                          return (
+                            <button
+                              key={role.key}
+                              type="button"
+                              onClick={() => { setSelectedRole(role.key); clearMessages(); }}
+                              className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200 ${
+                                isActive ? role.activeBg : role.inactiveBg
+                              }`}
+                            >
+                              {/* Active dot */}
+                              {isActive && (
+                                <span className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${role.activeDot}`} />
+                              )}
+                              <span className={`${isActive ? role.activeText : "text-gray-500"} transition-colors`}>
+                                {role.icon}
+                              </span>
+                              <div className="text-center">
+                                <p className={`text-xs font-bold tracking-wide ${isActive ? role.activeText : "text-gray-500"} transition-colors`}>
+                                  {role.label}
+                                </p>
+                                <p className={`text-[10px] mt-0.5 ${isActive ? role.activeDesc : "text-gray-700"} transition-colors`}>
+                                  {role.desc}
+                                </p>
+                              </div>
+                              {isActive && (
+                                <span className={`px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-widest ${role.badge}`}>
+                                  Selected
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <form onSubmit={handleSignUp} className="space-y-4">
                       <div><label className={labelCls}>Full Name</label>
                         <input type="text" placeholder="Jane Doe" className={inputCls} value={signUpForm.name} onChange={(e) => setSignUpForm({ ...signUpForm, name: e.target.value })} required /></div>
@@ -372,7 +455,9 @@ export function AdminPage() {
                         <input type="password" placeholder="••••••••" className={inputCls} value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} required /></div>
                       {error   && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">{error}</p>}
                       {success && <p className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2.5">{success}</p>}
-                      <button type="submit" disabled={loading} className={btnCls}>{loading ? "Sending OTP…" : "Create Account"}</button>
+                      <button type="submit" disabled={loading} className={btnCls}>
+                        {loading ? "Sending OTP…" : `Create ${activeRoleConfig?.label} Account`}
+                      </button>
                     </form>
                   </>
                 )}
@@ -381,12 +466,17 @@ export function AdminPage() {
                   <>
                     <h2 className="text-center text-2xl font-bold text-white tracking-tight mb-1">Verify Email</h2>
                     <p className="text-center text-sm text-gray-500 mb-1">OTP for</p>
-                    <p className="text-center text-sm font-semibold text-indigo-400 mb-5">{signUpForm.email}</p>
+                    <p className="text-center text-sm font-semibold text-indigo-400 mb-2">{signUpForm.email}</p>
 
-                    {/* ✅ Prototype banner */}
+                    {/* Role badge in OTP screen */}
+                    <div className="flex justify-center mb-5">
+                      <span className={`px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest ${activeRoleConfig?.badge}`}>
+                        Creating {activeRoleConfig?.label}
+                      </span>
+                    </div>
+
                     <PrototypeBanner />
 
-                    {/* ✅ OTP hint box */}
                     {otpHint && (
                       <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/25 rounded-xl px-4 py-3 mb-5">
                         <div>
