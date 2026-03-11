@@ -409,9 +409,9 @@ const handlebooknow = (e) => {
           )}
         </button>
 
-        <div className="md:hidden absolute bottom-20 left-1/2 -translate-x-1/2 z-20 bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-medium flex items-center gap-2 animate-pulse">
+        <div className="md:hidden absolute bottom-15 left-1/2 -translate-x-1/2 z-20 bg-black/70 backdrop-blur-md text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-2 animate-pulse">
           <svg
-            className="w-4 h-4"
+            className="w-2 h-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -425,7 +425,7 @@ const handlebooknow = (e) => {
           </svg>
           Swipe to navigate
           <svg
-            className="w-4 h-4"
+            className="w-2 h-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
