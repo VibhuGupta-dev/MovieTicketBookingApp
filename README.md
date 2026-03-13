@@ -277,7 +277,7 @@ MIT License
 
 ---
 
-Built with ❤️ by **Vibhu Gupta (2026)**  
-Portfolio / Resume Project
+Built by **Vibhu Gupta (2026)**  
+
 
 If this project helped or inspired you, consider **starring the repository ⭐**
