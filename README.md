@@ -19,7 +19,14 @@ https://movieticketbookingapp-1.onrender.com
 Built as an **MVP / portfolio project** with fully functional core flows and dummy admin credentials for quick demo access.
 
 ---
+⚠️ **Demo Tip**
 
+To see available movies and showtimes in the live demo, select:
+
+State → **Uttar Pradesh**  
+City → **Lucknow**
+
+---
 # Core Features
 
 ## User Experience
