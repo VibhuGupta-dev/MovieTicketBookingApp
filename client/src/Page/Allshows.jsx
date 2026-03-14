@@ -34,7 +34,7 @@ export function Allshows() {
         const { data } = await axios.get(
           `${backendUrl}/cinemahall/api/getcinemahall/${cinemahallID}`
         )
-        console.log(data)
+   
         setCinema(data)
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch cinema hall")

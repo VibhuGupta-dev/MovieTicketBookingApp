@@ -4,8 +4,7 @@ const BASE_URL = 'https://api.countrystatecity.in/v1';
 
 export const getCitiesByState = async (countryCode, stateCode) => {
   try {
-    console.log(`Fetching cities for ${countryCode}/${stateCode}...`);
-    console.log(import.meta.env.VITE_API_KEY);
+  
     const response = await fetch(
       `${BASE_URL}/countries/${countryCode}/states/${stateCode}/cities`, 
       {
@@ -16,11 +15,11 @@ export const getCitiesByState = async (countryCode, stateCode) => {
       }
     );
     
-    console.log('Response status:', response.status);
+ 
     
     if (response.ok) {
       const cities = await response.json();
-      console.log(`✓ Found ${cities.length} cities`);
+ 
       return cities;
     } else {
       const errorText = await response.text();
@@ -52,7 +51,7 @@ export const getStatesByCountry = async (countryCode) => {
     
     if (response.ok) {
       const states = await response.json();
-      console.log(`✓ Found ${states.length} states`);
+   
       return states;
     } else {
       console.error('❌ Country not found or no states available');
@@ -71,7 +70,7 @@ export const testApiKey = async () => {
     });
     
     if (response.ok) {
-      console.log('✓ API Key is valid!');
+     
       return true;
     } else {
       console.error('❌ API Key is invalid!');

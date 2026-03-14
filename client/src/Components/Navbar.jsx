@@ -8,7 +8,6 @@ import AuthBox from "./Auth";
 
 const API = import.meta.env.VITE_BACKEND_URI;
 
-// ── DropdownContent moved OUTSIDE Navbar to prevent remount on every render ──
 function DropdownContent({
   activeTab,
   setActiveTab,
@@ -158,7 +157,6 @@ function DropdownContent({
   );
 }
 
-// ── ProfileButton moved OUTSIDE Navbar ──
 function ProfileButton({ isLoggedIn, handleProfileClick, iconSize = "h-6 w-6", btnSize = "h-10 w-10" }) {
   return (
     <button
@@ -191,13 +189,15 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
+  // ✅ Default: Uttar Pradesh
   const [selectedState, setSelectedState] = useState(() => {
     const saved = localStorage.getItem("selectedState");
-    return saved ? JSON.parse(saved) : { name: "Maharashtra", iso2: "MH" };
+    return saved ? JSON.parse(saved) : { name: "Uttar Pradesh", iso2: "UP" };
   });
 
+  // ✅ Default: Lucknow
   const [selectedCity, setSelectedCity] = useState(() => {
-    return localStorage.getItem("selectedCity") || "Mumbai";
+    return localStorage.getItem("selectedCity") || "Lucknow";
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -305,14 +305,17 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
             setSelectedState(parsedState);
             if (setSelectedStateId && parsedState.id) setSelectedStateId(parsedState.id);
           } else {
-            const mh = statesData.find((s) => s.iso2 === "MH") || statesData[0];
-            setSelectedState(mh);
-            localStorage.setItem("selectedState", JSON.stringify(mh));
+            // ✅ Fallback to UP
+            const up = statesData.find((s) => s.iso2 === "UP") || statesData[0];
+            setSelectedState(up);
+            localStorage.setItem("selectedState", JSON.stringify(up));
           }
         } else {
-          const mh = statesData.find((s) => s.iso2 === "MH") || statesData[0];
-          setSelectedState(mh);
-          localStorage.setItem("selectedState", JSON.stringify(mh));
+          // ✅ No saved state — set UP as default
+          const up = statesData.find((s) => s.iso2 === "UP") || statesData[0];
+          setSelectedState(up);
+          localStorage.setItem("selectedState", JSON.stringify(up));
+          if (setSelectedStateId && up.id) setSelectedStateId(up.id);
         }
       } else {
         setError("No states found for India.");
@@ -335,16 +338,18 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
           setSelectedCity(savedCity);
           if (setSelectedCityId && cityExists.id) setSelectedCityId(cityExists.id);
         } else {
-          const first = citiesData[0];
-          setSelectedCity(first.name);
-          localStorage.setItem("selectedCity", first.name);
-          if (setSelectedCityId && first.id) setSelectedCityId(first.id);
+          // ✅ Saved city not in this state — fallback to Lucknow or first city
+          const lucknow = citiesData.find((c) => c.name === "Lucknow") || citiesData[0];
+          setSelectedCity(lucknow.name);
+          localStorage.setItem("selectedCity", lucknow.name);
+          if (setSelectedCityId && lucknow.id) setSelectedCityId(lucknow.id);
         }
       } else if (citiesData?.length > 0) {
-        const first = citiesData[0];
-        setSelectedCity(first.name);
-        localStorage.setItem("selectedCity", first.name);
-        if (setSelectedCityId && first.id) setSelectedCityId(first.id);
+        // ✅ No saved city — set Lucknow as default
+        const lucknow = citiesData.find((c) => c.name === "Lucknow") || citiesData[0];
+        setSelectedCity(lucknow.name);
+        localStorage.setItem("selectedCity", lucknow.name);
+        if (setSelectedCityId && lucknow.id) setSelectedCityId(lucknow.id);
       }
       setLoading(false);
     };
@@ -401,9 +406,10 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     const statesData = await getStatesByCountry("IN");
     if (statesData?.length > 0) {
       setStates(statesData);
-      const mh = statesData.find((s) => s.iso2 === "MH") || statesData[0];
-      setSelectedState(mh);
-      localStorage.setItem("selectedState", JSON.stringify(mh));
+      // ✅ Retry bhi UP set karega
+      const up = statesData.find((s) => s.iso2 === "UP") || statesData[0];
+      setSelectedState(up);
+      localStorage.setItem("selectedState", JSON.stringify(up));
     } else {
       setError("No states found.");
     }
@@ -417,7 +423,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Shared props for DropdownContent
   const dropdownProps = {
     activeTab,
     setActiveTab,
@@ -434,7 +439,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
     handleRetry,
   };
 
-  // ── Render ──
   return (
     <>
       <header className="navbar bg-white border-b border-gray-100">
@@ -609,11 +613,8 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
         {/* ── Global Profile Dropdown ── */}
         {isLoggedIn && profileMenuOpen && (
           <>
-            {/* Backdrop */}
             <div className="fixed inset-0 z-40" onClick={() => setProfileMenuOpen(false)} />
-            {/* Menu */}
             <div className="fixed right-4 top-20 z-50 w-52 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden">
-              {/* User info header */}
               <div className="px-4 py-3 bg-purple-50 border-b border-purple-100">
                 <p className="text-sm font-semibold text-purple-700 truncate">
                   {user?.name || "Account"}
@@ -621,7 +622,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
                 <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
               </div>
 
-              {/* My Profile */}
               <button
                 onClick={() => {
                   navigate("/profile");
@@ -642,7 +642,6 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
 
               <div className="h-px bg-gray-100 mx-3" />
 
-              {/* Logout */}
               <button
                 onClick={handleLogout}
                 disabled={logoutLoading}

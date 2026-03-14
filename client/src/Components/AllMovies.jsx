@@ -23,7 +23,7 @@ export default function AllMovies() {
           `${backendUrl}/movie/api/allmovie`
         );
         const data = response.data || [];
-        console.log(data);
+
         if (mounted) {
           setMovies(data);
           

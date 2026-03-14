@@ -39,14 +39,14 @@ export function AllcinemaMoviebased() {
         );
         
         const data  = response.data || [];
-        console.log(data , response)
+      
         const uniqueShows = Array.from(
           new Map(data.map((item) => [item.cinemaId?._id, item])).values()
         );
 
         setShows(uniqueShows);
         const showid = uniqueShows
-        console.log(showid)
+   
       
                
 

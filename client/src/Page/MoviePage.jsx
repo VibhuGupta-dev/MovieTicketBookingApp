@@ -76,7 +76,7 @@ const handlebooknow = (e) => {
   useEffect(() => {
     const fetchMovies = async () => {
     
-      console.log("MoviePage: Fetching movies from API...");
+
       
       try {
         const response = await axios.get(
@@ -84,8 +84,7 @@ const handlebooknow = (e) => {
         );
         
         // ===== DEBUG CONSOLE 4: API Response =====
-        console.log("MoviePage: Movies fetched successfully!");
-        console.log("Total movies:", response.data.length);
+
         
         setMovies(response.data || []);
         setTotalMovies(response.data.length);
@@ -153,8 +152,6 @@ const handlebooknow = (e) => {
       </>
     );
   }
-
-  console.log("🎨 MoviePage: Rendering main content with", movies.length, "movies");
 
   return (
     <>

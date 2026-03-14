@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
  const backendUrl = import.meta.env.VITE_BACKEND_URI
 
 export function AllCinemaPage() {
-  console.log("🎥 AllCinemaPage: Component rendering");
+
    const navigate = useNavigate();
  
   const [selectedStateId, setSelectedStateId] = useState(null);
@@ -19,13 +19,11 @@ export function AllCinemaPage() {
 
   useEffect(() => {
     if (!selectedStateId || !selectedCityId) {
-      console.log("⏸️ AllCinemaPage: Waiting for state/city selection...");
+     
       return;
     }
 
-    console.log("🌐 AllCinemaPage: Fetching cinemas...");
-    console.log("   → State ID:", selectedStateId);
-    console.log("   → City ID:", selectedCityId);
+
 
     const fetchCinemas = async () => {
       setIsLoading(true);
@@ -43,9 +41,7 @@ export function AllCinemaPage() {
           }
         );
 
-        console.log("✅ AllCinemaPage: Cinemas fetched successfully!");
-        console.log("   → Response:", response.data);
-        console.log("   → Total cinemas:", response.data?.length || 0);
+    
 
         setCinemas(response.data || []);
        
@@ -63,9 +59,9 @@ export function AllCinemaPage() {
     fetchCinemas();
   }, [selectedStateId, selectedCityId]);
 
-  console.log("🎨 AllCinemaPage: Rendering with", cinemas.length, "cinemas");
+
 const handleview = (e) => {
- console.log(e)
+
  navigate(`/${e.cinema._id}`)
 }
   return (

@@ -10,7 +10,7 @@ export default function ProtectedRoute({ children, allowedRole }) {
   // Decode the token to get the role (if JWT)
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    console.log(payload , "ss")
+  
     if (allowedRole && payload.role !== allowedRole) {
       return <Navigate to="/" replace />;
     }
