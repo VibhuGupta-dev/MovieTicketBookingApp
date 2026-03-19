@@ -166,7 +166,12 @@ export function Profile() {
                         #{String(ticket._id).slice(-8).toUpperCase()}
                       </span>
                     </div>
-
+ <div className="flex justify-between py-3">
+                      <span className="text-[11px] uppercase tracking-wider text-white/25">Screen Number</span>
+                      <span className="font-mono text-[11px] text-white/50">
+                        {String(ticket.ScreenNumber).slice(-8).toUpperCase()}
+                      </span>
+                    </div>
                     {/* ── SEAT NUMBERS ── */}
                     <div className="py-3">
                       <span className="text-[11px] uppercase tracking-wider text-white/25 block mb-2">
@@ -199,6 +204,7 @@ export function Profile() {
                         </span>
                       </div>
                     )}
+                    
 
                     <div className="flex justify-between py-3">
                       <span className="text-[11px] uppercase tracking-wider text-white/25">Amount</span>

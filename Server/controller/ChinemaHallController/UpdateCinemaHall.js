@@ -4,9 +4,11 @@ export async function updateStore(req, res) {
   try {
     const {
       cinemaHallName,
+      TotalScreens,
       description,
       locationLink,
       address,
+      
       logo
     } = req.body;
 
@@ -25,8 +27,10 @@ export async function updateStore(req, res) {
       {
         cinemaHallName,
         description,
+        TotalScreens,
         locationLink,
         address,
+       
         logo
       },
       { new: true } 

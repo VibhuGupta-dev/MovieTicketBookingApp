@@ -23,6 +23,7 @@ export async function addChinemaHall(req, res) {
       cinemaHallName,
       description,
       locationLink,
+      TotalScreens,
       address,
       logo,
       row,
@@ -39,6 +40,7 @@ export async function addChinemaHall(req, res) {
       !description ||
       !locationLink ||
       !address ||
+      !TotalScreens ||
       !logo ||
       !row ||
       !seatsPerRow ||
@@ -78,6 +80,7 @@ export async function addChinemaHall(req, res) {
       seats,
       cinemaHallName,
       description,
+      TotalScreens,
       locationLink,
       address,
       logo,

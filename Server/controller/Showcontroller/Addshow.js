@@ -14,8 +14,8 @@ export async function addshow(req, res) {
     }
 
     // AddShow.js — replace the destructuring and validation
-    const { showDate, timeSlots } = req.body;
-
+    const { showDate, timeSlots , ScreenNumber} = req.body;
+   console.log(ScreenNumber)
     if (!showDate) {
       return res.status(400).json({ message: "showDate is empty" });
     }
@@ -27,6 +27,7 @@ export async function addshow(req, res) {
       UserId: userId,
       movieId,
       cinemaId,
+      ScreenNumber,
       showDate,
       timeSlots,
     });

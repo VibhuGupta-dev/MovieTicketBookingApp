@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const showSchema = new mongoose.Schema({
@@ -24,17 +23,17 @@ const showSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
- 
+  ScreenNumber: {
+    type: Number,
+    required: true,
+  },
   timeSlots: [
     {
       time: { type: String, required: true },
       bookedSeatIds: [{ type: mongoose.Schema.Types.ObjectId }],
-    }
+    },
   ],
-
-
 });
-
 
 const Show = mongoose.model("Show", showSchema);
 export default Show;

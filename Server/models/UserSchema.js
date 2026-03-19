@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
     orderHistory: [
       {
         orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
-        ticketId: { type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }, // ✅ yeh add karo
+        ticketId: { type: mongoose.Schema.Types.ObjectId, ref: "Ticket" }, 
         totalAmount: Number,
         status: String,
         orderedAt: { type: Date, default: Date.now },

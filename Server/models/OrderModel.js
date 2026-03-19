@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
-
+ScreenNumber : Number,
     currency: {
       type: String,
       default: "INR"

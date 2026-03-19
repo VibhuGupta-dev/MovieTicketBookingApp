@@ -41,7 +41,9 @@ const movieticketSchema = mongoose.Schema({
   bookedAt: {
     type: Date,
     default: Date.now,
-  }
+  },
+  ScreenNumber : Number,
+
 });
 
 const ticket = mongoose.model("Ticket", movieticketSchema);

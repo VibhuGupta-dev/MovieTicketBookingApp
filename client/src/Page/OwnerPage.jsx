@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const API = import.meta.env.VITE_BACKEND_URI
+const API = import.meta.env.VITE_BACKEND_URI;
 
 function getToken() {
   return localStorage.getItem("token");
@@ -205,6 +205,7 @@ function EditModal({ cinema, onClose, onSaved }) {
     cinemaHallName: cinema.cinemaHallName || "",
     description: cinema.description || "",
     address: cinema.address || "",
+    TotalScreens: cinema.TotalScreens || "",
     locationLink: cinema.locationLink || "",
     logo: cinema.logo || "",
   });
@@ -222,7 +223,7 @@ function EditModal({ cinema, onClose, onSaved }) {
       await axios.put(
         `${API}/cinemahall/api/updatecinemahall/${cinema._id}`,
         form,
-        authHeaders(),
+        authHeaders()
       );
       onSaved();
     } catch (err) {
@@ -249,6 +250,7 @@ function EditModal({ cinema, onClose, onSaved }) {
         >
           {Icons.Close("h-4 w-4")}
         </button>
+
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 bg-indigo-600/20 rounded-xl flex items-center justify-center text-indigo-400">
             {Icons.Edit("h-5 w-5")}
@@ -258,6 +260,7 @@ function EditModal({ cinema, onClose, onSaved }) {
             <p className="text-gray-500 text-xs">{cinema.cinemaHallName}</p>
           </div>
         </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className={labelCls}>Cinema Name</label>
@@ -269,6 +272,21 @@ function EditModal({ cinema, onClose, onSaved }) {
               required
             />
           </div>
+
+          {/* ✅ wrapped in div, same as other fields */}
+          <div>
+            <label className={labelCls}>Total Screens</label>
+            <input
+              name="TotalScreens"
+              type="number"
+              min={1}
+              value={form.TotalScreens}
+              onChange={handleChange}
+              className={inputCls}
+              required
+            />
+          </div>
+
           <div>
             <label className={labelCls}>Description</label>
             <textarea
@@ -279,6 +297,7 @@ function EditModal({ cinema, onClose, onSaved }) {
               className={`${inputCls} resize-none`}
             />
           </div>
+
           <div>
             <label className={labelCls}>Address</label>
             <input
@@ -288,6 +307,7 @@ function EditModal({ cinema, onClose, onSaved }) {
               className={inputCls}
             />
           </div>
+
           <div>
             <label className={labelCls}>Location Link</label>
             <input
@@ -298,6 +318,7 @@ function EditModal({ cinema, onClose, onSaved }) {
               placeholder="https://maps.google.com/..."
             />
           </div>
+
           <div>
             <label className={labelCls}>Logo URL</label>
             <input
@@ -308,11 +329,13 @@ function EditModal({ cinema, onClose, onSaved }) {
               placeholder="https://..."
             />
           </div>
+
           {error && (
             <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
               {error}
             </p>
           )}
+
           <div className="flex gap-3 pt-2">
             <button
               type="button"
@@ -513,6 +536,7 @@ function AddCinemaModal({ onClose, onAdded }) {
     locationLink: "",
     logo: "",
     StateId: "",
+    TotalScreens: "",
     CityId: "",
     row: "",
     seatsPerRow: "",
@@ -857,6 +881,16 @@ function AddCinemaModal({ onClose, onAdded }) {
                 />
               </div>
               <div>
+                <label className={labelCls}>TotalScreen *</label>
+                <input
+                  name="TotalScreens"
+                  value={form.TotalScreens}
+                  onChange={handleChange}
+                  placeholder="Todal number of Screen"
+                  className={inputCls}
+                />
+              </div>
+              <div>
                 <label className={labelCls}>Google Maps Link</label>
                 <input
                   name="locationLink"
@@ -1039,7 +1073,7 @@ function AddShowModal({ cinema, onClose, onAdded }) {
   const [timeInput, setTimeInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [screen, setScreen] = useState("");
   useEffect(() => {
     axios
       .get(`${API}/movie/api/allmovie`, authHeaders())
@@ -1070,6 +1104,7 @@ function AddShowModal({ cinema, onClose, onAdded }) {
         {
           showDate: form.showDate,
           timeSlots: timeSlots.map((t) => ({ time: t })),
+          ScreenNumber: screen,
         },
         authHeaders(),
       );
@@ -1081,6 +1116,8 @@ function AddShowModal({ cinema, onClose, onAdded }) {
     }
   };
 
+  const totalscreen = cinema.TotalScreens;
+
   const inputCls =
     "w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 placeholder-gray-600 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all";
   const labelCls =
@@ -1088,7 +1125,7 @@ function AddShowModal({ cinema, onClose, onAdded }) {
   const filteredMovies = movies.filter((m) =>
     (m.MovieName || "").toLowerCase().includes(movieSearch.toLowerCase()),
   );
-
+  console.log(screen);
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/70 px-4"
@@ -1195,6 +1232,33 @@ function AddShowModal({ cinema, onClose, onAdded }) {
               className={inputCls}
             />
           </div>
+
+
+    <div className="flex flex-col gap-3 bg-blue-950/40 rounded-xl p-5 w-fit">
+  <label className="text-[11px] font-medium uppercase tracking-widest text-blue-300">
+    Select screen number
+  </label>
+
+  <div className="flex flex-wrap gap-2">
+    {Array.from({ length: totalscreen }).map((_, i) => (
+      <button
+        key={i}
+        onClick={() => setScreen(i + 1)}
+        className={`h-9 min-w-[44px] px-3 rounded-lg border-[1.5px] text-sm font-medium
+          transition-all duration-100
+          ${
+            screen === i + 1
+              ? "bg-blue-600 text-white border-blue-600 scale-105 font-semibold"
+              : "bg-transparent text-blue-400 border-blue-700 hover:bg-blue-900/50"
+          }`}
+      >
+        {i + 1}
+      </button>
+    ))}
+  </div>
+</div>
+
+
 
           <div>
             <label className={labelCls}>

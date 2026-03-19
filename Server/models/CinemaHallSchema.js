@@ -29,6 +29,7 @@ const CinemaHallSchema = new mongoose.Schema(
       },
     ],
     cinemaHallName: String,
+    TotalScreens : Number,
     description: String,
     locationLink: String,
     address: String,

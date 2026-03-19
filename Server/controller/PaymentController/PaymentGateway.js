@@ -28,6 +28,8 @@ export async function createOrder(req, res) {
 
     const show = await Show.findById(seatBooking.ShowId);
     const cinemaId = show.cinemaId
+    const screenNumber = show.ScreenNumber
+    console.log(screenNumber)
  const cinema = await Cinema.findById(cinemaId);
 const rate = cinema.seats[0].rate;
 
@@ -55,6 +57,8 @@ const specificSeat = cinema.seats.find(s => String(s._id) === String(seatId));
       showId: seatBooking.ShowId,
       seatIds: seatId,
       amount: totalAmount,
+      ScreenNumber : screenNumber,
+
       status: "pending",
     });
 

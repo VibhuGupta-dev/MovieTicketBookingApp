@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node App.js",
-    "dev": "nodemon App.js"
+    "dev": "nodemon App.js",
+    "prod": "pm2 start App.js -i max --name ristrict-backend",
+     "restart": "pm2 restart all",
+  "stop": "pm2 stop all"
   },
   "author": "",
   "license": "ISC",

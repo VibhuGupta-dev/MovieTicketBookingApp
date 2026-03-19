@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 
 const MONGO_URI = process.env.MONGO_URI;
+
 const connectMongoDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(MONGO_URI, {
+      maxPoolSize: 100,
+      minPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+    });
     console.log("MongoDB connected");
   } catch (err) {
     console.error("MongoDB connection failed:", err.message);
