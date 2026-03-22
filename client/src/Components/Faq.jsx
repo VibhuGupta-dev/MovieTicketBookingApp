@@ -56,7 +56,7 @@ const faqs = [
 
 const ChevronIcon = ({ open }) => (
   <svg
-    className={`h-4 w-4 text-gray-400 transition-transform duration-300 flex-shrink-0 ${open ? "rotate-180 text-purple-400" : ""}`}
+    className={`h-5 w-5 transition-transform duration-200 flex-shrink-0 ${open ? "rotate-180" : ""}`}
     fill="none" stroke="currentColor" viewBox="0 0 24 24"
   >
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -67,22 +67,16 @@ function FAQItem({ q, a, index }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div
-      className={`border rounded-xl overflow-hidden transition-all duration-200 ${
-        open
-          ? "border-purple-500/40 bg-purple-500/5"
-          : "border-gray-800 bg-black hover:border-gray-700"
-      }`}
-    >
+    <div className="border-b border-gray-200 last:border-b-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-gray-50 transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <span className={`text-xs font-bold w-5 flex-shrink-0 tabular-nums transition-colors ${open ? "text-purple-400" : "text-gray-600"}`}>
+        <div className="flex items-start gap-4">
+          <span className="text-sm font-semibold text-gray-400 w-8 flex-shrink-0 tabular-nums">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className={`text-sm font-semibold transition-colors ${open ? "text-white" : "text-gray-300"}`}>
+          <span className="text-base font-medium text-gray-900">
             {q}
           </span>
         </div>
@@ -90,11 +84,11 @@ function FAQItem({ q, a, index }) {
       </button>
 
       <div
-        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`transition-all duration-200 ease-in-out overflow-hidden ${
           open ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <p className="px-5 pb-5 text-sm text-gray-400 leading-relaxed pl-14">
+        <p className="px-6 pb-5 text-sm text-gray-600 leading-relaxed pl-20">
           {a}
         </p>
       </div>
@@ -108,26 +102,26 @@ export function FAQ() {
   const current = faqs.find((f) => f.category === activeCategory);
 
   return (
-    <section className="bg-black py-20 px-6">
-      <div className="max-w-3xl mx-auto">
+    <section className="bg-white py-16 px-6">
+      <div className="max-w-4xl mx-auto">
 
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-purple-400 text-xs font-semibold uppercase tracking-widest mb-3">Support</p>
-          <h2 className="text-white text-3xl font-bold mb-3">Frequently Asked Questions</h2>
-          <p className="text-gray-500 text-sm">Everything you need to know about booking and managing shows.</p>
+          <p className="text-purple-500 text-sm font-semibold mb-2">Support</p>
+          <h2 className="text-gray-900 text-3xl font-bold mb-3">Frequently Asked Questions</h2>
+          <p className="text-gray-600 text-base">Everything you need to know about booking and managing shows.</p>
         </div>
 
         {/* Category tabs */}
-        <div className="flex items-center gap-2 mb-8 bg-black border border-gray-800 rounded-xl p-1">
+        <div className="flex items-center gap-3 mb-10 border-b border-gray-200">
           {faqs.map((f) => (
             <button
               key={f.category}
               onClick={() => setActiveCategory(f.category)}
-              className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg transition-all duration-200 ${
+              className={`py-3 px-5 text-sm font-semibold transition-all duration-200 border-b-2 ${
                 activeCategory === f.category
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40"
-                  : "text-gray-500 hover:text-gray-300"
+                  ? "border-purple-500 text-purple-500"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               {f.category}
@@ -136,20 +130,20 @@ export function FAQ() {
         </div>
 
         {/* FAQ items */}
-        <div className="space-y-2">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           {current.items.map((item, i) => (
             <FAQItem key={item.q} q={item.q} a={item.a} index={i} />
           ))}
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-10 text-center border border-gray-800 rounded-2xl p-6 bg-black">
-          <p className="text-gray-400 text-sm mb-3">Still have questions?</p>
+        <div className="mt-12 text-center border border-gray-200 rounded-lg p-8 bg-gray-50">
+          <p className="text-gray-700 text-base mb-4 font-medium">Still have questions?</p>
           <a
             href="mailto:support@cinebook.in"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-purple-900/30"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-700 text-white text-sm font-semibold rounded-md transition-colors"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
