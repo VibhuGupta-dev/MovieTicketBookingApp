@@ -14,15 +14,29 @@ import { socketHandler } from "./controller/TicketBookingController/Lockticket.j
 import paymentrouter from "./routes/PaymentRoutes.js"
 import seatbookinrouter from "./routes/SeatBookRoutes.js"
 import dotenv from "dotenv"
+import Redis from "ioredis"
 
 dotenv.config()
 
 const PORT = process.env.PORT || 3000
 const CLIENT_URL = process.env.CLIENT_URL
+const host = process.env.HOST
+const port = process.env.PORT_REDIS
+const password = process.env.PASSWORD
 
 const app = express()
 export const server = createServer(app)
 
+
+export const redis = new Redis({
+  host : host,
+  port : port,
+  password : password
+})
+
+redis.on("connect" , () => {
+  console.log("redis connected")
+})
 
 export const io = new Server(server, {
   cors: {

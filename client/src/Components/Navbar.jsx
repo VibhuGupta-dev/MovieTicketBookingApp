@@ -450,7 +450,7 @@ export default function Navbar({ setSelectedStateId, setSelectedCityId }) {
               className="pt-3 py-1 h-full cursor-pointer"
               onClick={() => handleNavigate("Movies")}
             >
-              <img src={logo} alt="Ristrict Logo" className="h-full w-auto object-contain" />
+              <img src={logo} alt="Ristrict Logo" className="h-25 w-40 object-cover" />
             </div>
             <div className="flex items-center gap-3">
               <button
