@@ -20,15 +20,13 @@ export async function getmovie(req, res) {
 
 export async function getallmovies(req, res) {
     try {
-
         const cacheExists = await redis.exists("movies");
         
         if (cacheExists) {
             console.log("redis hit");
             const movies = await redis.get("movies");
-            return res.json({
-                movies: JSON.parse(movies), 
-            });
+            
+            return res.status(200).json(JSON.parse(movies));
         }
 
         console.log("redis miss - fetching from DB");
@@ -38,9 +36,10 @@ export async function getallmovies(req, res) {
             return res.status(404).json({ message: "no movies found" });
         }
 
-        await redis.setex("movies", 300 , JSON.stringify(movies));
+        await redis.setex("movies", 300, JSON.stringify(movies));
 
-        return res.status(200).send(movies);
+        return res.status(200).json(movies);
+        
     } catch (err) {
         console.error("Error in getallmovies:", err);
         return res.status(500).json({ message: "error in get all movies" });
