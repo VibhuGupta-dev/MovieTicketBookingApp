@@ -11,7 +11,7 @@ Whether you're exploring movies solo or admins managing theaters, **Ristrict** d
 
 # Live Demo
 
-https://movieticketbookingapp-1.onrender.com
+https://movie-ticket-booking-app-kappa.vercel.app/
 
 **Backend:** Render  
 **Frontend:** Vite + React
